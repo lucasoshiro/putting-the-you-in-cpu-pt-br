@@ -1,87 +1,166 @@
 ---
 chapter: 1
-title: The “Basics”
-shortname: Basics
+title: O "básico"
+shortname: Básico
 slug: the-basics
 updatedAt: 2023-07-19T18:57:54.630Z
 ---
 
-The one thing that surprised me over and over again while writing this article was how *simple* computers are. It's still hard for me not to psych myself out, expecting more complexity or abstraction than actually exists! If there's one thing you should burn into your brain before continuing, it's that everything that seems simple actually is that simple. This simplicity is very beautiful and sometimes very, very cursed.
+<!-- The one thing that surprised me over and over again while writing this article was how *simple* computers are. It's still hard for me not to psych myself out, expecting more complexity or abstraction than actually exists! If there's one thing you should burn into your brain before continuing, it's that everything that seems simple actually is that simple. This simplicity is very beautiful and sometimes very, very cursed. -->
 
-Let's start with the basics of how your computer works at its very core.
+Uma coisa que me surpreendeu várias vezes enquanto escrevia este artigo é o quão *simples* os computadores são. Ainda é difícil que eu não pire, esperando mais complexidade ou abstração do que realmente existe! Se tem alguma coisa que você deveria guardar em seu cérebro antes de continuar, é que tudo que parece simples na verdade é realmente simples. Essa simplicidade é bem bonita e por vezes muito, muito amaldiçoada.
 
-## How Computers Are Architected
+<!-- Let's start with the basics of how your computer works at its very core. -->
 
-The *central processing unit* (CPU) of a computer is in charge of all computation. It's the big cheese. The shazam alakablam. It starts chugging as soon as you start your computer, executing instruction after instruction after instruction.
+Vamos começar pelo básico de como seu computador funciona pelo seu núcleo.
 
-The first mass-produced CPU was the [Intel 4004](http://www.intel4004.com/), designed in the late 60s by an Italian physicist and engineer named Federico Faggin. It was a 4-bit architecture instead of the [64-bit](https://en.wikipedia.org/wiki/64-bit_computing) systems we use today, and it was far less complex than modern processors, but a lot of its simplicity does still remain.
+<!-- ## How Computers Are Architected -->
 
-The "instructions" that CPUs execute are just binary data: a byte or two to represent what instruction is being run (the opcode), followed by whatever data is needed to run the instruction. What we call *machine code* is nothing but a series of these binary instructions in a row. [Assembly](https://en.wikipedia.org/wiki/Assembly_language) is a helpful syntax for reading and writing machine code that's easier for humans to read and write than raw bits; it is always compiled to the binary that your CPU knows how to read.
+## Como os computadores são arquitetados
 
-<img src='/images/assembly-to-machine-code-translation.png' loading='eager' style='max-width: 400px;' alt='A diagram demonstrating how machine code translates to assembly and back. A bidirectional arrow connects three examples: Machine Code (Binary) followed by 3 bytes of binary numbers, Machine Code (Hex) followed by those 3 bytes translated to hex (0x83, 0xC3, 0x0A), and Assembly followed by "add ebx, 10". The Assembly and Machine Code are color-coded so it is clear that each byte of the machine code translate to one word in the assembly.' width='935' height='505' />
+<!-- The *central processing unit* (CPU) of a computer is in charge of all computation. It's the big cheese. The shazam alakablam. It starts chugging as soon as you start your computer, executing instruction after instruction after instruction. -->
 
-> An aside: instructions aren't always represented 1:1 in machine code as in the above example. For example, `add eax, 512` translates to `05 00 02 00 00`.
+A unidade de controle central (em inglês, *central processing unit*, ou CPU) de um computador é responsável por todas as computações. É o chefão. O manda chuva. Ela começa a rodar assim que você liga seu computador, executando instrução após instrução após instrução.
+
+<!-- The first mass-produced CPU was the [Intel 4004](http://www.intel4004.com/), designed in the late 60s by an Italian physicist and engineer named Federico Faggin. It was a 4-bit architecture instead of the [64-bit](https://en.wikipedia.org/wiki/64-bit_computing) systems we use today, and it was far less complex than modern processors, but a lot of its simplicity does still remain. -->
+
+A primeira CPU feita em massa foi o [Intel 4004](http://www.intel4004.com/), projetada no fim dos anos 60 por um físico e engenheiro italiano chamado Federico Faggin. Ela tinha uma arquitetura de 4 bits em vez dos [64 bits](https://en.wikipedia.org/wiki/64-bit_computing) que usamos hoje, e ela era bem menos complexa que processadores modernos, mas muito de sua simplicidade ainda existe.
+
+<!-- The "instructions" that CPUs execute are just binary data: a byte or two to represent what instruction is being run (the opcode), followed by whatever data is needed to run the instruction. What we call *machine code* is nothing but a series of these binary instructions in a row. [Assembly](https://en.wikipedia.org/wiki/Assembly_language) is a helpful syntax for reading and writing machine code that's easier for humans to read and write than raw bits; it is always compiled to the binary that your CPU knows how to read. -->
+
+As instru;'oes que as CPUs executam são apenas dados binários: um byte ou dois representam qual instrução está sendo executada (o opcode), seguida de quaisquer dados que sejam necessários para executar essa instrução. O que chamamos de *código de máquina* não é nada além de uma série dessas instruções binárias em sequência. A linguagem [Assembly](https://en.wikipedia.org/wiki/Assembly_language) é uma sintaxe que ajuda a ler e escrever código que sejam mais fáceis de serem lidos e escritos por humanos que apenas bits; ela é sempre compilada para o binário que a sua CPU sabe como ler.
+
+<!-- <img src='/images/assembly-to-machine-code-translation.png' loading='eager' style='max-width: 400px;' alt='A diagram demonstrating how machine code translates to assembly and back. A bidirectional arrow connects three examples: Machine Code (Binary) followed by 3 bytes of binary numbers, Machine Code (Hex) followed by those 3 bytes translated to hex (0x83, 0xC3, 0x0A), and Assembly followed by "add ebx, 10". The Assembly and Machine Code are color-coded so it is clear that each byte of the machine code translate to one word in the assembly.' width='935' height='505' /> -->
+
+<img src='/images/assembly-to-machine-code-translation.png' loading='eager' style='max-width: 400px;' alt='Um diagrama demonstrando como código de máquina é traduzido para assembly e vice-versa. Uma seta bidirecional conecta três exemplos: código de máquina (binário) seguido de 3 bytes de números binários, código de máquina (hexadecimal) seguido desses 3 bytes traduzidos para hexadecimal (0x83, 0xC3, x0A) e Assembly seguido de "add ebx, 10". O código assembly e o código de máquina são coloridos de forma que é claro que cada byte de cada código de máquina é traduzido para uma palavra em Assembly.' width='935' height='505' />
+
+<!-- > An aside: instructions aren't always represented 1:1 in machine code as in the above example. For example, `add eax, 512` translates to `05 00 02 00 00`. -->
+<!-- >  -->
+<!-- > The first byte (`05`) is an opcode specifically representing *adding the EAX register to a 32-bit number*. The remaining bytes are 512 (`0x200`) in [little-endian](https://en.wikipedia.org/wiki/Endianness) byte order. -->
+<!-- > -->
+<!-- > Defuse Security created [a helpful tool](https://defuse.ca/online-x86-assembler.htm) for playing around with the translation between assembly and machine code. -->
+
+> Uma observação: instruções não são sempre representadas de um para um para o código de máquina como exemplo acima. Por exemplo, `add eax, 512` é traduzido para `05 00 02 00 00`.
 > 
-> The first byte (`05`) is an opcode specifically representing *adding the EAX register to a 32-bit number*. The remaining bytes are 512 (`0x200`) in [little-endian](https://en.wikipedia.org/wiki/Endianness) byte order.
+> O primeiro byte (`05`) é um opcode representando especificamente *adicionar o registrador EAX para um número de 32 bits*. Os bytes remanescentes são 512 (`0x200`) na ordem de bytes [little-endian](https://en.wikipedia.org/wiki/Endianness)
 >
-> Defuse Security created [a helpful tool](https://defuse.ca/online-x86-assembler.htm) for playing around with the translation between assembly and machine code.
+> Defuse Security criou [uma ferramenta](https://defuse.ca/online-x86-assembler.htm) que ajuda bastante para brincar com a tradução entre Assembly e código de máquina.
 
-RAM is your computer's main memory bank, a large multi-purpose space which stores all the data used by programs running on your computer. That includes the program code itself as well as the code at the core of the operating system. The CPU always reads machine code directly from RAM, and code can't be run if it isn't loaded into RAM.
+<!-- RAM is your computer's main memory bank, a large multi-purpose space which stores all the data used by programs running on your computer. That includes the program code itself as well as the code at the core of the operating system. The CPU always reads machine code directly from RAM, and code can't be run if it isn't loaded into RAM. -->
 
-The CPU stores an *instruction pointer* which points to the location in RAM where it's going to fetch the next instruction. After executing each instruction, the CPU moves the pointer and repeats. This is the *fetch-execute cycle*.
+A RAM é o principal banco de memória do seu computador, um grande espaço para vários propósitos que guarda todos os dados usados por programas sendo executados em seu computador. Isso inclui o próprio código do programa bem como o código no núcleo do sistema operacional. A CPU sempre lê código de máquina diretamente da RAM, e o código não pode ser executado se não foi carregado na RAM.
 
-<img src='/images/fetch-execute-cycle.png' loading='lazy' style='max-width: 360px; margin: 0 auto;' alt='A diagram demonstrating the fetch-execute cycle. There are two bubbles of text. The first is labeled "Fetch" and has the text "Read instruction from memory at the current instruction pointer." The second is titled "Execute" and has the text "Run the instruction and then move the instruction pointer." The fetch bubble has an arrow pointing to the execute bubble, and the execute bubble has an arrow pointing back to the fetch bubble, implying a repeated process.' width='848' height='458' />
+<!-- The CPU stores an *instruction pointer* which points to the location in RAM where it's going to fetch the next instruction. After executing each instruction, the CPU moves the pointer and repeats. This is the *fetch-execute cycle*. -->
 
-After executing an instruction, the pointer moves forward to immediately after the instruction in RAM so that it now points to the next instruction. That's why code runs! The instruction pointer just keeps chugging forward, executing machine code in the order in which it has been stored in memory. Some instructions can tell the instruction pointer to jump somewhere else instead, or jump different places depending on a certain condition; this makes reusable code and conditional logic possible.
+A CPU armazena um *apontador de instrução* (em inglês, *instruction pointer*), que aponta para a localização na RAM onde ela vai buscar a próxima instrução. Após executar cada instrução, a CPU move esse apontador e repete. Esse é o ciclo *busca-executa* (em inglês *fetch-execute  cycle*).
 
-This instruction pointer is stored in a [*register*](https://en.wikipedia.org/wiki/Processor_register). Registers are small storage buckets that are extremely fast for the CPU to read and write to. Each CPU architecture has a fixed set of registers, used for everything from storing temporary values during computations to configuring the processor.
+<!-- <img src='/images/fetch-execute-cycle.png' loading='lazy' style='max-width: 360px; margin: 0 auto;' alt='A diagram demonstrating the fetch-execute cycle. There are two bubbles of text. The first is labeled "Fetch" and has the text "Read instruction from memory at the current instruction pointer." The second is titled "Execute" and has the text "Run the instruction and then move the instruction pointer." The fetch bubble has an arrow pointing to the execute bubble, and the execute bubble has an arrow pointing back to the fetch bubble, implying a repeated process.' width='848' height='458' /> -->
 
-Some registers are directly accessible from machine code, like `ebx` in the earlier diagram.
+<img src='/images/fetch-execute-cycle.png' loading='lazy' style='max-width: 360px; margin: 0 auto;' alt='Um diagrama mostrando o ciclo busca-executa. Há dois balões de texto. O primeiro é rotulado "Busca" e tem um texto "Lê a instrução da memória no apontador de instrução atual." O segundo é rotulado "Executa" e tem o texto "Executa a instrução e então move o apontador de instrução". O balão "Busca" tem uma seta apontando par o balão "Executa" e o balão "Executa" tem uma seta apontando de volta para o balão "Busca", implicando um processo que se repete.' width='848' height='458' />
 
-Other registers are only used internally by the CPU, but can often be updated or read using specialized instructions. One example is the instruction pointer, which can't be read directly but can be updated with, for example, a jump instruction.
+<!-- After executing an instruction, the pointer moves forward to immediately after the instruction in RAM so that it now points to the next instruction. That's why code runs! The instruction pointer just keeps chugging forward, executing machine code in the order in which it has been stored in memory. Some instructions can tell the instruction pointer to jump somewhere else instead, or jump different places depending on a certain condition; this makes reusable code and conditional logic possible. -->
 
-## Processors Are Naive
+Após executar uma instrução, o apontador se move para a frente imediatamente após a instrução na RAM de forma que agora aponta para a próxima instrução. É por isso que o código executa! O ponteiro de instrução apenas se move para a frente, executando o código de máquina na ordem que foi armazenado na memória. Algumas instruções podem dizer ao ponteiro de instrução para pular para outro lugar, ou pular para diferentes lugares dependendo de uma certa condição; isso torna o reúso de código e a lógica condicional possivel.
 
-Let's go back to the original question: what happens when you run an executable program on your computer? First, a bunch of magic happens to get ready to run it — we’ll work through all of this later — but at the end of the process there’s machine code in a file somewhere. The operating system loads this into RAM and instructs the CPU to jump the instruction pointer to that position in RAM. The CPU continues running its fetch-execute cycle as usual, so the program begins executing!
+<!-- This instruction pointer is stored in a [*register*](https://en.wikipedia.org/wiki/Processor_register). Registers are small storage buckets that are extremely fast for the CPU to read and write to. Each CPU architecture has a fixed set of registers, used for everything from storing temporary values during computations to configuring the processor. -->
 
-(This was one of those psyching-myself-out moments for me — seriously, this is how the program you are using to read this article is running! Your CPU is fetching your browser's instructions from RAM in sequence and directly executing them, and they're rendering this article.)
+Esse apontador de instrução é armazenado em um [*registrador*](https://en.wikipedia.org/wiki/Processor_register). Registradores são pequenos espaços de armazenamento que são extremamente rápidos para a CPU ler e escrever. Cada arquitetura de CPU tem um conjunto fixo de registradores, usados para tudo desde guardar valores temporários durante computações até configurar o processador.
 
-<img src='/images/instruction-pointer.png' loading='lazy' style='max-width: 400px;' alt='A diagram depicting a series of bytes of machine code in RAM. A highlighted byte is pointed to by an arrow labeled "Instruction Pointer," and there are arrows representing how the instruction pointer moves forward in RAM.' width='935' height='372' />
+<!-- Some registers are directly accessible from machine code, like `ebx` in the earlier diagram. -->
+
+Alguns registradores são diretamente acessíveis pelo código de máquina, como o `ebx` no diagrama anterior.
+
+<!-- Other registers are only used internally by the CPU, but can often be updated or read using specialized instructions. One example is the instruction pointer, which can't be read directly but can be updated with, for example, a jump instruction. -->
+
+Outros registradores são apenas usados internamente pela CPU, mas podem ser atualizados ou lidos usando instruções especializadas. Um exemplo é o apontador de instrução, que não pode ser lido diretamente mas pode ser atualizado, por exemplo, com uma instrução de salto (em inglês, `jump instruction`).
+
+<!-- ## Processors Are Naive -->
+
+## Processadores são inocentes
+
+<!-- Let's go back to the original question: what happens when you run an executable program on your computer? First, a bunch of magic happens to get ready to run it — we’ll work through all of this later — but at the end of the process there’s machine code in a file somewhere. The operating system loads this into RAM and instructs the CPU to jump the instruction pointer to that position in RAM. The CPU continues running its fetch-execute cycle as usual, so the program begins executing! -->
+
+Vamos voltar para a questão original: o que acontece quando você executa um programa em seu computador? A princípio, um monte de mágica acontece para prepará-lo para ser executado - nós vamos falar disso depois - mas no fim desse processo temos código de máquina em um arquivo em algum lugar. O sistema operacional vai carregar isso para a RAM e diz para a CPU para mover o apontador de instrução para essa posição na RAM. A CPU continua executando o ciclo busca-executa como sempre, então o programa começa a ser executado!
+
+<!-- (This was one of those psyching-myself-out moments for me — seriously, this is how the program you are using to read this article is running! Your CPU is fetching your browser's instructions from RAM in sequence and directly executing them, and they're rendering this article.) -->
+
+(Essa foi uma dos momentos que me fez pirar - sério, é assim que o programa que você está usando para ler este artigo é executado! Sua CPU está buscando as instruções do seu navegador na RAM em sequência e diretamente as executando, e elas estão renderizando este artigo.)
+
+<!-- <img src='/images/instruction-pointer.png' loading='lazy' style='max-width: 400px;' alt='A diagram depicting a series of bytes of machine code in RAM. A highlighted byte is pointed to by an arrow labeled "Instruction Pointer," and there are arrows representing how the instruction pointer moves forward in RAM.' width='935' height='372' /> -->
+
+<img src='/images/instruction-pointer.png' loading='lazy' style='max-width: 400px;' alt='Um diagrama mostrando uma série de bytes de código de máquina na RAM. Um byte destacado é apontado por uma seta rotulada "Apontador de Instrução", e há setas representando como um apontador de instrução se move para a frente na RAM.' width='935' height='372' />
 
 It turns out CPUs have a super basic worldview; they only see the current instruction pointer and a bit of internal state. Processes are entirely operating system abstractions, not something CPUs natively understand or keep track of.
 
-*\*waves hands\* processes are abstractions made up by ~~os devs~~ big byte to sell more computers*
+<!-- *\*waves hands\* processes are abstractions made up by ~~os devs~~ big byte to sell more computers* -->
 
-For me, this raises more questions than it answers:
+*\*papo furado\* processos são abstrações feitas pelos ~~desenvolvedores de sistemas operacionais~~ grandes empresas para vender mais computadores *
 
-1. If the CPU doesn’t know about multiprocessing and just executes instructions sequentially, why doesn’t it get stuck inside whatever program it’s running? How can multiple programs run at once?
-2. If programs run directly on the CPU, and the CPU can directly access RAM, why can't code access memory from other processes, or, god forbid, the kernel?
-3. Speaking of which, what's the mechanism that prevents every process from running any instruction and doing anything to your computer? AND WHAT'S A DAMN SYSCALL?
+<!-- For me, this raises more questions than it answers: -->
 
-The question about memory deserves its own section and is covered in [chapter 5](/the-translator-in-your-computer) — the TL;DR is that most memory accesses actually go through a layer of misdirection that remaps the entire address space. For now, we're going to pretend that programs can access all RAM directly and computers can only run one process at once. We'll explain away both of these assumptions in time.
+Para mim, isso levanta mais questçoes do que responde:
 
-It's time to leap through our first rabbit hole into a land filled with syscalls and security rings.
+<!-- 1. If the CPU doesn’t know about multiprocessing and just executes instructions sequentially, why doesn’t it get stuck inside whatever program it’s running? How can multiple programs run at once? -->
 
-> **Aside: what is a kernel, btw?**
+1. Se a CPU não sabe nada sobre multiprocessamento e apenas executa instruções sequencialmente, por que não fica presa dentro programa que está executando? Como múltiplos programas podem ser executados ao mesmo tempo?
+
+<!-- 2. If programs run directly on the CPU, and the CPU can directly access RAM, why can't code access memory from other processes, or, god forbid, the kernel? -->
+
+2. Se um programa é executado diretamente pela CPU, e a CPU pode acessar diretamente a RAM, por que um código não pode acessar a memória de outros processos, ou (pelo amor, perdão), o kernel?
+
+<!-- 3. Speaking of which, what's the mechanism that prevents every process from running any instruction and doing anything to your computer? AND WHAT'S A DAMN SYSCALL? -->
+
+3. Falando nisso, qual é o mecanismo que previne que cada processo execute qualquer execução? E QUE DIABOS É UMA SYSCALL?
+
+<!-- The question about memory deserves its own section and is covered in [chapter 5](/the-translator-in-your-computer) — the TL;DR is that most memory accesses actually go through a layer of misdirection that remaps the entire address space. For now, we're going to pretend that programs can access all RAM directly and computers can only run one process at once. We'll explain away both of these assumptions in time. -->
+
+A questão sobre memória merece sua própria seção e está coberta no [capítulo 5](/the-translator-in-your-computer) — um TL;DR é que a maior parte dos acessos à memória na verdade vão através de uma camada de direcionamento que remapeia todo o espaço de endereço. Por enquanto, vamos fingir que o programa pode acessar toda a RAM diretamente e que os computadores podem executar apenas um processo por vez. Vamos explicar essas suposições depois.
+
+<!-- It's time to leap through our first rabbit hole into a land filled with syscalls and security rings. -->
+
+É hora de entrarmos no primeiro buraco de coelho rumo a uma terra lotada de syscalls e anéis de segurança.
+
+<!-- > **Aside: what is a kernel, btw?** -->
+<!-- >  -->
+<!-- > Your computer's operating system, like macOS, Windows, or Linux, is the collection of software that runs on your computer and makes all the basic stuff work. "Basic stuff" is a really general term, and so is "operating system" — depending on who you ask, it can include such things as the apps, fonts, and icons that come with your computer by default. -->
+<!-- >  -->
+<!-- > The kernel, however, is the core of the operating system. When you boot up your computer, the instruction pointer starts at a program somewhere. That program is the kernel. The kernel has near-full access to your computer's memory, peripherals, and other resources, and is in charge of running software installed on your computer (known as userland programs). We'll learn about how the kernel has this access — and how userland programs don't — over the course of this article. -->
+<!-- > -->
+<!-- > Linux is just a kernel and needs plenty of userland software like shells and display servers to be usable. The kernel in macOS is called [XNU](https://en.wikipedia.org/wiki/XNU) and is Unix-like, and the modern Windows kernel is called the [NT Kernel](https://en.wikipedia.org/wiki/Architecture_of_Windows_NT). -->
+
+> **Observação: afinal, o que é um kernel?**
 > 
-> Your computer's operating system, like macOS, Windows, or Linux, is the collection of software that runs on your computer and makes all the basic stuff work. "Basic stuff" is a really general term, and so is "operating system" — depending on who you ask, it can include such things as the apps, fonts, and icons that come with your computer by default.
+> O sistema operacional de seu computador, como o macOS, Windows ou Linux, é a coleção de software que executa em seu computador e faz todo o trabalho básico. "Trabalho básico" é realmente um termo genérico, da mesma forma que "sistema operacional" - dependendo a quem você pergunta, isso pode incluir coisas como apps, fontes, e ícones que vêm com seu computador por padrão.
 > 
-> The kernel, however, is the core of the operating system. When you boot up your computer, the instruction pointer starts at a program somewhere. That program is the kernel. The kernel has near-full access to your computer's memory, peripherals, and other resources, and is in charge of running software installed on your computer (known as userland programs). We'll learn about how the kernel has this access — and how userland programs don't — over the course of this article.
+> O kernel, porém, é o núcleo do sistema operacional. Quando você liga seu computador, o apontador de instrução começa em um programa em algum lugar. Esse programa é o kernel. O kernel tem quase total acesso à memória de seu computador, periféricos e outros recursos, e é responsável por executar software instalado em seu computador (conhecido como programas de espaço de usuário, ou *userland* em inglês). Vamos falar como o kernel tem esse acesso - e como programas do espaço de usuário não têm - conforme avançamos neste artigo.
 >
-> Linux is just a kernel and needs plenty of userland software like shells and display servers to be usable. The kernel in macOS is called [XNU](https://en.wikipedia.org/wiki/XNU) and is Unix-like, and the modern Windows kernel is called the [NT Kernel](https://en.wikipedia.org/wiki/Architecture_of_Windows_NT).
+> Linux é apenas uma kernel, e precisa de vários programas de espaço de usuário como shells e servidores gráficos para ser usuárvel. O kernel do macOS é chamado [XNU](https://en.wikipedia.org/wiki/XNU) e é Unix-like, e o kernel do Windows moderno é chamado [NT Kernel](https://en.wikipedia.org/wiki/Architecture_of_Windows_NT)
 
-## Two Rings to Rule Them All
+<!-- ## Two Rings to Rule Them All -->
 
-The *mode* (sometimes called privilege level or ring) a processor is in controls what it's allowed to do. Modern architectures have at least two options: kernel/supervisor mode and user mode. While an architecture might support more than two modes, only kernel mode and user mode are commonly used these days.
+## Dois anéis para todos governar
 
-In kernel mode, anything goes: the CPU is allowed to execute any supported instruction and access any memory. In user mode, only a subset of instructions is allowed, I/O and memory access is limited, and many CPU settings are locked. Generally, the kernel and drivers run in kernel mode while applications run in user mode.
+<!-- The *mode* (sometimes called privilege level or ring) a processor is in controls what it's allowed to do. Modern architectures have at least two options: kernel/supervisor mode and user mode. While an architecture might support more than two modes, only kernel mode and user mode are commonly used these days. -->
 
-Processors start in kernel mode. Before executing a program, the kernel initiates the switch to user mode.
+O *modo* (as vezes chamado nível de privilégio ou anel) que processador está controla o que é permitido fazer. Arquiteturas modernas tem ao menos duas opções: modo de kernel/superviosr e modo de usuário. Enquanto uma arquitetura pode suportar mais que dois modos, apenas o modo de kernel e o de usuário são usados atualmente.
 
-<img src='/images/kernel-mode-vs-user-mode.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='Two fake iMessage screenshots demonstrating the different between user and kernel mode protections. The first, labeled Kernel Mode: right side says "Read this protected memory!", left side replies "Here you go, dear :)". The second, labeled User Mode: right side says "Read this protected memory!", left side replies "No! Segmentation fault!"' width='1072' height='433' />
+<!-- In kernel mode, anything goes: the CPU is allowed to execute any supported instruction and access any memory. In user mode, only a subset of instructions is allowed, I/O and memory access is limited, and many CPU settings are locked. Generally, the kernel and drivers run in kernel mode while applications run in user mode. -->
 
-An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two [least significant bits](https://en.wikipedia.org/wiki/Bit_numbering) of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: user mode.
- 
+No modo de kernel, tudo pode acontecer: a CPU tem a permissão de executar qualquer instrução suportada e acessar qualquer memória. No modo de usuário, apenas um subconjunto de instruções é permitido, entrada, saída e memória são limitados, e várias configurações da CPU são travadas. Geralmente, o kernel e os drivers são executadas em modo de kernel enquanto aplicações são executadas em modo de usuário.
+
+<!-- Processors start in kernel mode. Before executing a program, the kernel initiates the switch to user mode. -->
+
+Processadores começam no modo de kernel. Antes de executar um programa, o kernel inicia a transição para o o modo de usuário.
+
+<!-- <img src='/images/kernel-mode-vs-user-mode.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='Two fake iMessage screenshots demonstrating the different between user and kernel mode protections. The first, labeled Kernel Mode: right side says "Read this protected memory!", left side replies "Here you go, dear :)". The second, labeled User Mode: right side says "Read this protected memory!", left side replies "No! Segmentation fault!"' width='1072' height='433' /> -->
+
+<img src='/images/kernel-mode-vs-user-mode.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='Dois screenshots falsos do WhatsApp demonstrando a diferença entre o modo de usuário e o modo de usuário. O primeiro, rotulado "Modo de Kernel": o lado direito diz "Leia essa memória protegida!", o lado esquerdo diz "aqui está, meu caro :-)". O segundo, rotulado "modo de usuário": o lado direito diz: "Leia essa memória protegida!!", o lado esquerdo responde: "Não! Segmentation fault!"' width='1072' height='433' />
+
+
+<!-- An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two [least significant bits](https://en.wikipedia.org/wiki/Bit_numbering) of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: user mode. -->
+
+Um exemplo de como os modos do processador se manifestam em uma arquitetura real: no x86-64, o nível de privilégio atual (em inglês, *current privilege level (CPL)*) pode ser lido de um registrador chamado `cs` (*code segment*). Especificamente, o CPL fica nos [bits menos significantes](https://en.wikipedia.org/wiki/Bit_numbering) do registrador `cs`. Esses dois bits podem ser armazenar até quatro possiveis anéis do x86-64: anel 0 é o modo de kernel e anel 3 é o modo de usuário. Os anéis 1 e 2 são feitos para executar drivers mas são só usados por alguns sistemas operacionais mais velhos e de nicho. Se os bits do CPL são `11`, por exemplo, a CPU está executando no anel 3: modo de usuário.
+
 ## What Even is a Syscall?
 
 Programs run in user mode because they can't be trusted with full access to the computer. User mode does its job, preventing access to most of the computer — but programs need to be able to access I/O, allocate memory, and interact with the operating system *somehow*! To do so, software running in user mode has to ask the operating system kernel for help. The OS can then implement its own security protections to prevent programs from doing anything malicious.
