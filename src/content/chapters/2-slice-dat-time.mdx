@@ -1,31 +1,52 @@
 ---
 chapter: 2
-title: Slice Dat Time
+title: Fatie esse tempo
 shortname: Multitasking
 slug: slice-dat-time
 updatedAt: 2023-08-02T18:14:02.296Z
 ---
 
-Let's say you're building an operating system and you want users to be able to run multiple programs at once. You don’t have a fancy multi-core processor though, so your CPU can only run one instruction at a time!
+<!-- Let's say you're building an operating system and you want users to be able to run multiple programs at once. You don’t have a fancy multi-core processor though, so your CPU can only run one instruction at a time! -->
 
-Luckily, you’re a very smart OS developer. You figure out that you can fake parallelism by letting processes take turns on the CPU. If you cycle through the processes and run a couple instructions from each one, they can all be responsive without any single process hogging the CPU.
+Digamos que você está construindo seu próprio sistema operacional e você quer que os usuários sejam capazes de executar múltiplos programas de uma só vez. Mas você não tem um processador de vários núcleos, então sua CPU só pode executar uma instrução por vez!
 
-But how do you take control back from program code to switch processes? After a bit of research, you discover that most computers come with timer chips. You can program a timer chip to trigger a switch to an OS interrupt handler after a certain amount of time passes.
+<!-- Luckily, you’re a very smart OS developer. You figure out that you can fake parallelism by letting processes take turns on the CPU. If you cycle through the processes and run a couple instructions from each one, they can all be responsive without any single process hogging the CPU. -->
 
-## Hardware Interrupts
+Por sorte, você é uma pessoa inteligente desenvolvendo um sistema operacional. Você repara que pode fazer um paralelismo falso deixando que processos sejam executados em turnos na CPU. Se você circula entre os processos e executa algumas instruções de cada um, eles podem ser responsivos o suficiente sem que nenhum deles sequestre a CPU.
 
-Earlier, we talked about how software interrupts are used to hand control from a userland program to the OS. These are called “software” interrupts because they’re voluntarily triggered by a program — machine code executed by the processor in the normal fetch-execute cycle tells it to switch control to the kernel.
+<!-- But how do you take control back from program code to switch processes? After a bit of research, you discover that most computers come with timer chips. You can program a timer chip to trigger a switch to an OS interrupt handler after a certain amount of time passes. -->
 
-<img src='/images/keyboard-hardware-interrupt.png' loading='eager' style='max-width: 500px; margin: 0 auto;' alt='A drawing illustrating how hardware interrupts break normal execution. On top: a drawing of a keyboard with a highlighted key, with a lightning bolt drawn to a CPU on the right. On the bottom: some binary labeled "program code," a similar lightning bolt, and some more binary labeled "kernel code." The lightning bolt is labeled "interrupt triggers context switch."' width='935' height='503' />
+Mas como você consegue tomar o controle de volta do código do programa para alternar entre processos? Depois de um pouco de pesquisa, você descobre que a maior parte dos computadores vêm com chips temporizadores. Você pode programar um chip temporizador para chamar uma interrupção do sistema após um certo intervalo de tempo.
 
-OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Programmable_interval_timer) to trigger hardware interrupts for multitasking:
+<!-- ## Hardware Interrupts -->
 
-1. Before jumping to program code, the OS sets the timer chip to trigger an interrupt after some period of time.
-2. The OS switches to user mode and jumps to the next instruction of the program.
-3. When the timer elapses, it triggers a hardware interrupt to switch to kernel mode and jump to OS code.
-4. The OS can now save where the program left off, load a different program, and repeat the process.
+## Interrupções de hardware
 
-This is called *preemptive multitasking*; the interruption of a process is called [*preemption*](https://en.wikipedia.org/wiki/Preemption_(computing)). If you’re, say, reading this article on a browser and listening to music on the same machine, your very own computer is probably following this exact cycle thousands of times a second.
+<!-- Earlier, we talked about how software interrupts are used to hand control from a userland program to the OS. These are called “software” interrupts because they’re voluntarily triggered by a program — machine code executed by the processor in the normal fetch-execute cycle tells it to switch control to the kernel. -->
+
+Anteriormente, nós falamos sobre como interrupções de software são usadas para passar o controle do espaço de usuário para o sistema operacional. Essas são chamadas interrupções de "software" porque elas são voluntariamente chamadas por um programa - um código de máquina executado pelo processador no ciclo busca-executa normal diz para trocar de controle com o kernel.
+
+<!-- <img src='/images/keyboard-hardware-interrupt.png' loading='eager' style='max-width: 500px; margin: 0 auto;' alt='A drawing illustrating how hardware interrupts break normal execution. On top: a drawing of a keyboard with a highlighted key, with a lightning bolt drawn to a CPU on the right. On the bottom: some binary labeled "program code," a similar lightning bolt, and some more binary labeled "kernel code." The lightning bolt is labeled "interrupt triggers context switch."' width='935' height='503' /> -->
+
+<img src='/images/keyboard-hardware-interrupt.png' loading='eager' style='max-width: 500px; margin: 0 auto;' alt='Um desenho ilustrando como interrupções de hardware param a execução normal. No topo: o desenho de um teclado com uma tecla destacada, com um raio desenhado apontando para uma CPU na direita. Embaixo: algum binário chamado de "código do programa", um raio similar, e algum binário rotulado "código do kernel". O raio é rotulado "a interrupção inicia uma troca de contexto"' width='935' height='503' />
+
+<!-- OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Programmable_interval_timer) to trigger hardware interrupts for multitasking: -->
+
+Os escalonadores do sistema operacional usam *chips temporizadores* como os [PITs](https://en.wikipedia.org/wiki/Programmable_interval_timer) para iniciar interrupções de hardware que permitem a multitarefa (em inglês, *multitasking*):
+
+<!-- 1. Before jumping to program code, the OS sets the timer chip to trigger an interrupt after some period of time. -->
+<!-- 2. The OS switches to user mode and jumps to the next instruction of the program. -->
+<!-- 3. When the timer elapses, it triggers a hardware interrupt to switch to kernel mode and jump to OS code. -->
+<!-- 4. The OS can now save where the program left off, load a different program, and repeat the process. -->
+
+1. Antes de ir para o código do programa, o sistema operacional configura o chip temporizador para fazer uma interrupção depois de algum período de tempo.
+2. O sistema operacional alterna para o modo de usuário e salta para a próxima instrução do programa.
+3. Quando o tempo do temporizador termina, ele chama uma interrupção de hardware para mudar para o modo de kernel e ir para o código do sistema operacional.
+4. O sistema operacional pode agora salvar onde o programa foi deixado, carregar outro programa e repetir o processo.
+
+<!-- This is called *preemptive multitasking*; the interruption of a process is called [*preemption*](https://en.wikipedia.org/wiki/Preemption_(computing)). If you’re, say, reading this article on a browser and listening to music on the same machine, your very own computer is probably following this exact cycle thousands of times a second. -->
+
+Isso é chamada de *multitarefa preemptiva*; a interrupção de um processo é chamada [*preempção*](https://en.wikipedia.org/wiki/Preemption_(computing)). Se você está, por exemplo, lendo este artigo em um navegador e ouvindo música na mesma máquina, seu computador provavelmente está fazendo esse ciclo milhares de vezes por segundo.
 
 ## Timeslice Calculation
 
