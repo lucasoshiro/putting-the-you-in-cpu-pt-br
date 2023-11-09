@@ -8,28 +8,50 @@ updatedAt: 2023-07-24T15:57:08.044Z
 
 import CodeBlock from '../../components/CodeBlock.astro'
 
-So far, we've covered how CPUs execute machine code loaded from executables, what ring-based security is, and how syscalls work. In this section, we'll dive deep into the Linux kernel to figure out how programs are loaded and run in the first place.
+<!-- So far, we've covered how CPUs execute machine code loaded from executables, what ring-based security is, and how syscalls work. In this section, we'll dive deep into the Linux kernel to figure out how programs are loaded and run in the first place. -->
 
-We're specifically going to look at Linux on x86-64. Why?
+Até agora, nós cobrimos como CPUs executam códigos de máquinas carregados a partir de executáveis, o que é segurança baseada em anéis, e como chamadas de sistema funcionam. Nesta seção, nós iremos nos aprofundar no kernel Linux para descobrir como programas são carregados e são executados.
 
-- Linux is a fully featured production OS for desktop, mobile, and server use cases. Linux is open source, so it's super easy to research just by reading its source code. I will be directly referencing some kernel code in this article!
-- x86-64 is the architecture that most modern desktop computers use, and the target architecture of a lot of code. The subset of behavior I mention that is x86-64-specific will generalize well.
+<!-- We're specifically going to look at Linux on x86-64. Why? -->
 
-Most of what we learn will generalize well to other operating systems and architectures, even if they differ in various specific ways.
+Nós vamos olhar especificamente para o Linux em x86-64, mas por quê?
 
-## Basic Behavior of Exec Syscalls
+<!-- - Linux is a fully featured production OS for desktop, mobile, and server use cases. Linux is open source, so it's super easy to research just by reading its source code. I will be directly referencing some kernel code in this article! -->
+<!-- - x86-64 is the architecture that most modern desktop computers use, and the target architecture of a lot of code. The subset of behavior I mention that is x86-64-specific will generalize well. -->
 
-<img src='/images/linux-program-execution-process.png' loading='eager' style='max-width: 600px; margin: 0 auto;' alt='A flowchart demonstrating exec syscalls. On the left, a group of flowchart items labeled "user space," on the right, a group labeled "kernel space." Starting in the user space group: the user runs ./file.bin in their terminal, which then runs the syscall execve("./file.bin", ...). This flows to the SYSCALL instruction being executed, which then points to the first item in the kernel space group: "Load and set up a binary" which points to "Try a binfmt." If the binfmt is supported, it starts the new process (replacing the current). If not, it tries the binfmt again.' width='917' height='424' />
+- O Linux é um sistema operacional completo com casos de uso para desktop, dispositivos móveis e servidores. Linux é open source, então é super fácil de pesquisar só olhando seu código fonte. Eu estarei referenciando diretamente alguns códigos do kernel neste artigo!
+- x86-64 é a arquitetura que a maior parte dos desktops modernos usam, e é a arquitetura alvo de um monte de códigos. O subconjunto de comportamentos que eu menciono que são específicos de x86-64 serão bem genéricos.
 
-Let's start with a very important system call: `execve`. It loads a program and, if successful, replaces the current process with that program. A couple other syscalls (`execlp`, `execvpe`, etc.) exist, but they all layer on top of `execve` in various fashions.
+<!-- Most of what we learn will generalize well to other operating systems and architectures, even if they differ in various specific ways. -->
 
-> **Aside: `execveat`**
+A maior parte do que vamos ver pode ser generalizado para outros sistemas operacionais e arquiteturas, mesmo se eles forem diferentes em vários aspectos.
+
+<!-- ## Basic Behavior of Exec Syscalls -->
+
+## Comportamento básico de syscalls Exec
+
+<!-- <img src='/images/linux-program-execution-process.png' loading='eager' style='max-width: 600px; margin: 0 auto;' alt='A flowchart demonstrating exec syscalls. On the left, a group of flowchart items labeled "user space," on the right, a group labeled "kernel space." Starting in the user space group: the user runs ./file.bin in their terminal, which then runs the syscall execve("./file.bin", ...). This flows to the SYSCALL instruction being executed, which then points to the first item in the kernel space group: "Load and set up a binary" which points to "Try a binfmt." If the binfmt is supported, it starts the new process (replacing the current). If not, it tries the binfmt again.' width='917' height='424' /> -->
+
+<img src='/images/linux-program-execution-process.png' loading='eager' style='max-width: 600px; margin: 0 auto;' alt='Um fluxograma demonstrando as syscalls exec. Na esquerda, um grupo de itens do fluxograma rotulado "espaço de usuário", na direita, um grupo rotulado "espaço de kernel". Começando no grupo do espaço de usuário: o usuário executa ./file.bin no seu terminal, então executa a syscall execve("./file.bin, ..."). Isso flui para a instrução SYSCALL sendo executada, que então aponta para o primeiro item no grupo do espaço de kernel: "Carregamento e preparação do binário", que aponta para "tenta binfmt". Se binfmt é suportado, começa um novo processo (substituindo o atual). Se não, tenta o binfmt de novo.' width='917' height='424' />
+
+<!-- Let's start with a very important system call: `execve`. It loads a program and, if successful, replaces the current process with that program. A couple other syscalls (`execlp`, `execvpe`, etc.) exist, but they all layer on top of `execve` in various fashions. -->
+
+Vamos começar com uma syscall importante: `execve`. Ela carrega o programa e, se for bem sucedida, substitui o processo atual por esse programa. Algumas outras syscalls (`execlp`, `execvpe`, etc.) existem, mas elas são feitas em uma camada acima do `execve` de várias formas.
+
+<!-- > **Aside: `execveat`** -->
+<!-- >  -->
+<!-- > `execve` is *actually* built on top of `execveat`, a more general syscall that runs a program with some configuration options. For simplicity, we'll mostly talk about `execve`; the only difference is that it provides some defaults to `execveat`. -->
+<!-- > -->
+<!-- > Curious what `ve` stands for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffixes to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at. -->
+
+> **Observação: `execveat`**
 > 
-> `execve` is *actually* built on top of `execveat`, a more general syscall that runs a program with some configuration options. For simplicity, we'll mostly talk about `execve`; the only difference is that it provides some defaults to `execveat`.
->
-> Curious what `ve` stands for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffixes to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at.
+> `execve` é na verdade feita em cima de `execveat`, uma syscall mais genérica que executa um programa com algumas opções de configuração. Para facilitar, nós iremos falar mais sobre a `execve`; a única diferença é que ela provê alguns parâmetros padrões para a `execveat`.
+> Tem curiosidade para saber o que `ve` significa? O `v` significa que um parametro o vetor (lista) de argumentos (`argv`) e o `e` significa que outro parâmetro é o vetor de váriáveis (`envp`). Várias outras syscalls têm diferentes sufixos para designar diferentes assinaturas de chamadas. O `at` em `execveat` é só "at" (o "em" em inglês), porque ele especifica a localização em que o `execve` será executado.
 
-The call signature of `execve` is:
+<!-- The call signature of `execve` is: -->
+
+A assinatura de chamada do `execve` é:
 
 <CodeBlock>
 ```c
@@ -37,17 +59,29 @@ int execve(const char *filename, char *const argv[], char *const envp[]);
 ```
 </CodeBlock>
 
-- The `filename` argument specifies a path to the program to run.
-- `argv` is a null-terminated (meaning the last item is a null pointer) list of arguments to the program. The `argc` argument you'll commonly see passed to C main functions is actually calculated later by the syscall, thus the null-termination.
-- The `envp` argument contains another null-terminated list of environment variables used as context for the application. They're... conventionally `KEY=VALUE` pairs. *Conventionally.* I love computers.
+<!-- - The `filename` argument specifies a path to the program to run. -->
+<!-- - `argv` is a null-terminated (meaning the last item is a null pointer) list of arguments to the program. The `argc` argument you'll commonly see passed to C main functions is actually calculated later by the syscall, thus the null-termination. -->
+<!-- - The `envp` argument contains another null-terminated list of environment variables used as context for the application. They're... conventionally `KEY=VALUE` pairs. *Conventionally.* I love computers. -->
 
-Fun fact! You know that convention where a program's first argument is the name of the program? That's *purely a convention*, and isn't actually set by the `execve` syscall itself! The first argument will be whatever is passed to `execve` as the first item in the `argv` argument, even if it has nothing to do with the program name.
+- O argumento `filename` especifica um caminho para programa executar.
+- `argv` é uma lista *null-terminated* (significa que o último item é um pointeiro nulo) de argumentos para o programa. O argumento `argc` que você vê normalmente sendo passado para uma função main em C é na verdade calculado depois pela syscall, por isso esse valor nulo.
+- O argumento `envp` contém outra lista *null-terminated* de variáveis de ambiente usadas como contexto para a aplicação. Elas são... convencionalmente pares `CHAVE=VALOR`. *Convencionalmente*. Eu amo computadores.
 
-Interestingly, `execve` does have some code that assumes `argv[0]` is the program name. More on this later when we talk about interpreted scripting languages.
+<!-- Fun fact! You know that convention where a program's first argument is the name of the program? That's *purely a convention*, and isn't actually set by the `execve` syscall itself! The first argument will be whatever is passed to `execve` as the first item in the `argv` argument, even if it has nothing to do with the program name. -->
 
-### Step 0: Definition
+Curiosidade: sabe essa convenção em que o primeiro argumento do programa é o nome do programa? Isso é *puramente uma convenção*, e não é de fato preenchido pela syscall `execve`! O primeiro argumento vai ser qualquer coisa que é passada para a `execve` como primeiro item do `argv`, mesmo que não tenha nada a ver com o nome do programa.
 
-We already know how syscalls work, but we've never seen a real-world code example! Let's look at the Linux kernel's source code to see how `execve` is defined under the hood:
+<!-- Interestingly, `execve` does have some code that assumes `argv[0]` is the program name. More on this later when we talk about interpreted scripting languages. -->
+
+É interessante que o `execve` tem alguns códigos que supõem que `argv[0]` é o nome do programa. Falaremos disso depois quando falarmos sobre linguagens de script interpretadas.
+
+<!-- ### Step 0: Definition -->
+
+### Passo 0: definição
+
+Nós já sabemos como syscalls funcionam, mas nós nunca vimous um exemplo de código do mundo real! Vamos dar uma olhada no código fonte do kernel Linux para ver como o `execve` é definido debaixo dos panos:
+
+<!-- We already know how syscalls work, but we've never seen a real-world code example! Let's look at the Linux kernel's source code to see how `execve` is defined under the hood: -->
 
 <CodeBlock name='fs/exec.c' startLine={2105} sourceUrl='https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/fs/exec.c#L2105-L2111'>
 ```c
@@ -61,11 +95,17 @@ SYSCALL_DEFINE3(execve,
 ```
 </CodeBlock>
 
-`SYSCALL_DEFINE3` is a macro for defining a 3-argument system call's code.
+<!-- `SYSCALL_DEFINE3` is a macro for defining a 3-argument system call's code. -->
 
-> I was curious why the [arity](https://en.wikipedia.org/wiki/Arity) is hardcoded in the macro name; I googled around and learned that this was a workaround to fix [some security vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2009-0029).
+`SYSCALL_DEFINE3` é uma macro para definir o código de uma syscall de 3 argumentos.
 
-The filename argument is passed to a `getname()` function, which copies the string from user space to kernel space and does some usage tracking things. It returns a `filename` struct, which is defined in `include/linux/fs.h`. It stores a pointer to the original string in user space as well as a new pointer to the value copied to kernel space:
+<!-- > I was curious why the [arity](https://en.wikipedia.org/wiki/Arity) is hardcoded in the macro name; I googled around and learned that this was a workaround to fix [some security vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2009-0029). -->
+
+> Eu estava curiosa para saber porque a [aridade](https://en.wikipedia.org/wiki/Arity) está hardcoded no nome da macro; eu procurei no Google e vi que isso é uma gambiarra para arrumar [uma vulnerabilidade de segurança](https://nvd.nist.gov/vuln/detail/CVE-2009-0029).
+
+<!-- The filename argument is passed to a `getname()` function, which copies the string from user space to kernel space and does some usage tracking things. It returns a `filename` struct, which is defined in `include/linux/fs.h`. It stores a pointer to the original string in user space as well as a new pointer to the value copied to kernel space: -->
+
+O argumento com o nome do arquivo é passado para a função `getname()`, que copia a string do espaço de usuário para o espaço de kernel e faz algumas coisas relacionadas ao seu uso. Ela retorna uma struct `filename` que é definida em `include/linux/fs.h`. Ela armazena um ponteiro para a string original no espaço de usuário, bem como um novo ponteiro para o valor copiado para o espaço de kernel:
 
 <CodeBlock name='include/linux/fs.h' startLine={2294} sourceUrl='https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/fs.h#L2294-L2300'>
 ```c
@@ -79,9 +119,13 @@ struct filename {
 ```
 </CodeBlock>
 
-The `execve` system call then calls a `do_execve()` function. This, in turn, calls `do_execveat_common()`with some defaults. The `execveat` syscall which I mentioned earlier also calls `do_execveat_common()`, but passes through more user-provided options.
+<!-- The `execve` system call then calls a `do_execve()` function. This, in turn, calls `do_execveat_common()`with some defaults. The `execveat` syscall which I mentioned earlier also calls `do_execveat_common()`, but passes through more user-provided options. -->
 
-In the below snippet, I've included the definitions of both `do_execve` and `do_execveat`:
+A chamada de sistema `execve` então chava a função `do_execve()`. Essa, por sua vez, chama `do_execveat_common()` com alguns valores padrões. A syscall `execveat` que foi mencionada anteriormente também chama `do_execveat_common()`, mas passa algumas opções a mais fornecidas pelo usuário.
+
+<!-- In the below snippet, I've included the definitions of both `do_execve` and `do_execveat`: -->
+
+Neste trecho de código abaixo eu incluí as definições tanto de `do_execve` quanto de `do_execveat`:
 
 <CodeBlock name='fs/exec.c' startLine={2028} sourceUrl='https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/fs/exec.c#L2028-L2046'>
 ```c
@@ -109,24 +153,43 @@ static int do_execveat(int fd, struct filename *filename,
 
 \[spacing sic\]
 
-In `execveat`, a file descriptor (a type of id that points to *some resource*) is passed to the syscall and then to `do_execveat_common`. This specifies the directory to execute the program relative to.
+<!-- In `execveat`, a file descriptor (a type of id that points to *some resource*) is passed to the syscall and then to `do_execveat_common`. This specifies the directory to execute the program relative to. -->
 
-In `execve`, a special value is used for the file descriptor argument, `AT_FDCWD`. This is a shared constant in the Linux kernel that tells functions to interpret pathnames as relative to the current working directory. Functions that accept file descriptors usually include a manual check like <code>if&nbsp;(fd&nbsp;==&nbsp;AT_FDCWD) \{&nbsp;/\*&nbsp;special codepath&nbsp;\*/&nbsp;\}</code>.
+Em `execveat`, um descritor de arquivo (um tipo de is que aponta para *algum recurso*) é passado para a syscall e então para `do_execveat_common`. Isso especifica o diretório onde o programa deve executar relativamente.
 
-### Step 1: Setup
+<!-- In `execve`, a special value is used for the file descriptor argument, `AT_FDCWD`. This is a shared constant in the Linux kernel that tells functions to interpret pathnames as relative to the current working directory. Functions that accept file descriptors usually include a manual check like <code>if&nbsp;(fd&nbsp;==&nbsp;AT_FDCWD) \{&nbsp;/\*&nbsp;special codepath&nbsp;\*/&nbsp;\}</code>. -->
 
-We've now reached `do_execveat_common`, the core function handling program execution. We're going to take a brief step back from staring at code to get a bigger picture view of what this function does.
+Em `execve`, um valor especial é usado para o argumento do descritor de arquivo, `AT_FDCWD`. Essa é uma constante compartilhada no kernel Linux que diz que às funções para interpretar nomes de arquivos como sendo relativos ao diretório atual. Funções que aceitam descritores de arquivos normalmente incluem uma checagem manual como <code>if&nbsp;(fd&nbsp;==&nbsp;AT_FDCWD) \{&nbsp;/\*&nbsp;algum código especial&nbsp;\*/&nbsp;\}</code>.
 
-The first major job of `do_execveat_common` is setting up a struct called `linux_binprm`. I won't include a copy of [the whole struct definition](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L15-L65), but there are several important fields to go over:
+<!-- ### Step 1: Setup -->
 
-- Data structures like `mm_struct` and `vm_area_struct` are defined to prepare virtual memory management for the new program.
-- `argc` and `envc` are calculated and stored to be passed to the program.
-- `filename` and `interp` store the filename of the program and its interpreter, respectively. These start out equal to each other, but can change in some cases: one such case is when running interpreted scripts with a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)). When executing a Python program, for example, `filename` points to the source file but `interp` is the path to the Python interpreter.
-- `buf` is an array filled with the first 256 bytes of the file to be executed. It's used to detect the format of the file and load script shebangs.
+### Passo 1: preparação
 
-(TIL: binprm stands for **bin**ary **pr**og**r**a**m**.)
+<!-- We've now reached `do_execveat_common`, the core function handling program execution. We're going to take a brief step back from staring at code to get a bigger picture view of what this function does. -->
 
-Let's take a closer look at this buffer `buf`:
+Nós chegamos em `do_execveat_common`, a principal função que faz a execução do programa. Nós vamos dar um pequeno passo para trás em iniciar o programa para ter uma ideia melhor do que essa função faz.
+
+<!-- The first major job of `do_execveat_common` is setting up a struct called `linux_binprm`. I won't include a copy of [the whole struct definition](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L15-L65), but there are several important fields to go over: -->
+
+A primeira tarefa principal de `do_execveat_common` é inicializar uma struct chamada `linux_binprm`. Eu não vou incluir uma cópia de [toda a definição da struct](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L15-L65), mas tem alguns campos importantes para dar uma olhada:
+
+<!-- - Data structures like `mm_struct` and `vm_area_struct` are defined to prepare virtual memory management for the new program. -->
+<!-- - `argc` and `envc` are calculated and stored to be passed to the program. -->
+<!-- - `filename` and `interp` store the filename of the program and its interpreter, respectively. These start out equal to each other, but can change in some cases: one such case is when running interpreted scripts with a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)). When executing a Python program, for example, `filename` points to the source file but `interp` is the path to the Python interpreter. -->
+<!-- - `buf` is an array filled with the first 256 bytes of the file to be executed. It's used to detect the format of the file and load script shebangs. -->
+
+- Estruturas de dados como `mm_struct` e `vm_area_struct` são definidas para preparar o gerencialmento de memória virtual para o novo programa.
+- `argc` e `envc` são calculadas e armazenadas para serem passadas para o programa.
+- `filename` e `interp` armazenam o nome de arquivo do programa e seu interpretador, respectivamente. Eles começam iguais, mas podem mudar em alguns casos: um deles é quando se está executando scripts interpretados usando uma [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)). Quando se executa um código Python, por exemplo, `filename` aponta para o arquivo com o código fonte mas `interp` é o caminho do interpretador Python.
+- `buf` é um array preenchido com os primeiros 256 bytes do arquivo a ser executado. É usado para detectar o formato do arquivo e carregar os shebangs do script.
+
+<!-- (TIL: binprm stands for **bin**ary **pr**og**r**a**m**.) -->
+
+(O que aprendi: binprm significa **bin**ary **pr**og**r**a**m**.)
+
+<!-- Let's take a closer look at this buffer `buf`: -->
+
+Vamos dar uma olhada mais de perto no buffer `buf`:
 
 <CodeBlock name='linux_binprm @ include/linux/binfmts.h' startLine={64} sourceUrl='https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L64'>
 ```c
@@ -134,7 +197,9 @@ Let's take a closer look at this buffer `buf`:
 ```
 </CodeBlock>
 
-As we can see, its length is defined as the constant `BINPRM_BUF_SIZE`. By searching the codebase for this string, we can find a definition for this in `include/uapi/linux/binfmts.h`:
+<!-- As we can see, its length is defined as the constant `BINPRM_BUF_SIZE`. By searching the codebase for this string, we can find a definition for this in `include/uapi/linux/binfmts.h`: -->
+
+Como podemos ver, seu tamho está definido na constante `BINPRM_BUF_SIZE`. Procurando na base de código por essa string, podemos encontrar a definição dela em `include/uapi/linux/binfmts.h`:
 
 <CodeBlock name='include/uapi/linux/binfmts.h' startLine={18} sourceUrl='https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/uapi/linux/binfmts.h#L18-L19'>
 ```c
@@ -143,7 +208,9 @@ As we can see, its length is defined as the constant `BINPRM_BUF_SIZE`. By searc
 ```
 </CodeBlock>
 
-So, the kernel loads the opening 256 bytes of the executed file into this memory buffer.
+<!-- So, the kernel loads the opening 256 bytes of the executed file into this memory buffer. -->
+
+Então, o kernel carrega os primeiros 256 bytes do arquivo que é executado dentro desse buffer na memória.
 
 > **Aside: what's a UAPI?**
 > 
