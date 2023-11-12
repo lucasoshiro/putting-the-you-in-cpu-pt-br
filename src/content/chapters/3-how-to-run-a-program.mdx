@@ -1,6 +1,6 @@
 ---
 chapter: 3
-title: How to Run a Program
+title: Como executar um programa
 shortname: Exec
 slug: how-to-run-a-program
 updatedAt: 2023-07-24T15:57:08.044Z
@@ -212,29 +212,53 @@ Como podemos ver, seu tamho está definido na constante `BINPRM_BUF_SIZE`. Procu
 
 Então, o kernel carrega os primeiros 256 bytes do arquivo que é executado dentro desse buffer na memória.
 
-> **Aside: what's a UAPI?**
+<!-- > **Aside: what's a UAPI?** -->
+<!-- >  -->
+<!-- > You might notice that the above code's path contains `/uapi/`. Why isn't the length defined in the same file as the `linux_binprm` struct, `include/linux/binfmts.h`? -->
+<!-- > -->
+<!-- > UAPI stands for "userspace API." In this case, it means someone decided that the length of the buffer should be part of the kernel's public API. In theory, everything UAPI is exposed to userland, and everything non-UAPI is private to kernel code. -->
+<!-- > -->
+<!-- > Kernel and user space code originally coexisted in one jumbled mass. In 2012, UAPI code was [refactored into a separate directory](https://lwn.net/Articles/507794/) as an attempt to improve maintainability. -->
+
+> **Observação: o que é uma UAPI?**
 > 
-> You might notice that the above code's path contains `/uapi/`. Why isn't the length defined in the same file as the `linux_binprm` struct, `include/linux/binfmts.h`?
+> Você deve ter reparado que o código acima contém `/uapi/`. Por que o tamanho não é definido no mesmo arquivo que a struct `linux_binprm`, `include/linux/binfmts.h`?
 >
-> UAPI stands for "userspace API." In this case, it means someone decided that the length of the buffer should be part of the kernel's public API. In theory, everything UAPI is exposed to userland, and everything non-UAPI is private to kernel code.
+> UAPI significa "userspace API". Neste caso, isso significa que alguém decidiu que o tamanho do buffer deveria ser parte da API pública do kernel. Em teoria, tudo da UAPI é exposta para o espaço de usuário, e tudo que não é UAPI é privado no código do kernel.
 >
-> Kernel and user space code originally coexisted in one jumbled mass. In 2012, UAPI code was [refactored into a separate directory](https://lwn.net/Articles/507794/) as an attempt to improve maintainability.
+> O código do kernel e do espaço de usuário originalmente coexistiam em uma mistura confusa. Em 2012, o código da UAPI foi [refatorado para um diretório separado](https://lwn.net/Articles/507794/) em uma tentativa de melhorar a mantenabilidade.
 
-### Step 2: Binfmts
+<!-- ### Step 2: Binfmts -->
 
-The kernel's next major job is iterating through a bunch of "binfmt" (binary format) handlers. These handlers are defined in files like `fs/binfmt_elf.c` and `fs/binfmt_flat.c`. [Kernel modules](https://wiki.archlinux.org/title/Kernel_module) can also add their own binfmt handlers to the pool.
+### Passo 2: Binfmts
 
-Each handler exposes a `load_binary()` function which takes a `linux_binprm` struct and checks if the handler understands the program's format.
+<!-- The kernel's next major job is iterating through a bunch of "binfmt" (binary format) handlers. These handlers are defined in files like `fs/binfmt_elf.c` and `fs/binfmt_flat.c`. [Kernel modules](https://wiki.archlinux.org/title/Kernel_module) can also add their own binfmt handlers to the pool. -->
 
-This often involves looking for [magic numbers](https://en.wikipedia.org/wiki/Magic_number_(programming)) in the buffer, attempting to decode the start of the program (also from the buffer), and/or checking the file extension. If the handler does support the format, it prepares the program for execution and returns a success code. Otherwise, it quits early and returns an error code.
+A próxima tarefa principal do kernel é iterar sobre um monte de handlers de "binfmt" (binary format). Esses handlers são definidos em arquivos como `fs/binfmt_elf.c` e `fs/binfmt_flat.c`. [Módulos do kernel](https://wiki.archlinux.org/title/Kernel_module) também podem adicionar os handlers de binfmt na lista.
 
-The kernel tries the `load_binary()` function of each binfmt until it reaches one that succeeds. Sometimes these will run recursively; for example, if a script has an interpreter specified and that interpreter is, itself, a script, the hierarchy might be `binfmt_script` > `binfmt_script` > `binfmt_elf` (where ELF is the executable format at the end of the chain).
+<!-- Each handler exposes a `load_binary()` function which takes a `linux_binprm` struct and checks if the handler understands the program's format. -->
 
-### Format Highlight: Scripts
+Cada handler expõe uma função `load_binary()` que recebe uma struct `linux_binprm` e checa se o handler entende o formato do programa.
 
-Of the many formats Linux supports, `binfmt_script` is the first I want to specifically talk about.
+<!-- This often involves looking for [magic numbers](https://en.wikipedia.org/wiki/Magic_number_(programming)) in the buffer, attempting to decode the start of the program (also from the buffer), and/or checking the file extension. If the handler does support the format, it prepares the program for execution and returns a success code. Otherwise, it quits early and returns an error code. -->
 
-Have you ever read or written a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix))? That line at the start of some scripts that specifies the path to the interpreter?
+Isso geralmente envolve buscar por [números mágicos](https://en.wikipedia.org/wiki/Magic_number_(programming)) no buffer, tentando decodificar o início do programa (também no buffer) e/ou checando a extensão do arquivo. Se o handler suporta o formato, ele prepara o programa para execução e retorna um código de sucesso. Caso contrário, ele termina precocemente e retorna um código de rro.
+
+<!-- The kernel tries the `load_binary()` function of each binfmt until it reaches one that succeeds. Sometimes these will run recursively; for example, if a script has an interpreter specified and that interpreter is, itself, a script, the hierarchy might be `binfmt_script` > `binfmt_script` > `binfmt_elf` (where ELF is the executable format at the end of the chain). -->
+
+O kernel tenta a função `load_binary()` de cada binfmt até chegar na que dá certo. Às vezes elas vão ser executadas recursivamente; por exemplo, se um script especifica um interpretador e esse interpretador é, por si só, um script, então a hierarquia será `binfmt_script` > `binfmt_script` > `binfmt_elf` (em que ELF é formato executável no fim da cadeia).
+
+<!-- ### Format Highlight: Scripts -->
+
+### Formato em destaque: Scripts
+
+<!-- Of the many formats Linux supports, `binfmt_script` is the first I want to specifically talk about. -->
+
+Dentre os vários formatos que o Linux suporta, o `binfmt_script` é o primeiro que eu quero falar sobre.
+
+<!-- Have you ever read or written a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix))? That line at the start of some scripts that specifies the path to the interpreter? -->
+
+Você já leu ou escreveu um [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix))? Aquela linha no começo de alguns scripts que especificam o caminho para o interpretador?
 
 <CodeBlock startLine={1}>
 ```bash
@@ -242,9 +266,13 @@ Have you ever read or written a [shebang](https://en.wikipedia.org/wiki/Shebang_
 ```
 </CodeBlock>
 
-I always just assumed these were handled by the shell, but no! Shebangs are actually a feature of the kernel, and scripts are executed with the same syscalls as every other program. Computers are *so cool*.
+<!-- I always just assumed these were handled by the shell, but no! Shebangs are actually a feature of the kernel, and scripts are executed with the same syscalls as every other program. Computers are *so cool*. -->
 
-Take a look at how `fs/binfmt_script.c` checks if a file starts with a shebang:
+Eu sempre supus que elas eram tratadas pelo shell, mas não! Shegans são na verdade uma feature do kernel, e scripts são executados com as mesmas syscalls que cada outro programa. Computadores são *tão legais*.
+
+<!-- Take a look at how `fs/binfmt_script.c` checks if a file starts with a shebang: -->
+
+Dê uma olhada em como `fs/binfmt_script.c` checa se um arquivo começa com um shebang:
 
 <CodeBlock name='load_script @ fs/binfmt_script.c' startLine={40} sourceUrl='https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/fs/binfmt_script.c#L40-L42'>
 ```c
@@ -254,45 +282,92 @@ Take a look at how `fs/binfmt_script.c` checks if a file starts with a shebang:
 ```
 </CodeBlock>
 
-If the file does start with a shebang, the binfmt handler then reads the interpreter path and any space-separated arguments after the path. It stops when it hits either a newline or the end of the buffer.
+<!-- If the file does start with a shebang, the binfmt handler then reads the interpreter path and any space-separated arguments after the path. It stops when it hits either a newline or the end of the buffer. -->
 
-There are two interesting, wonky things going on here.
+Se o arquivo não começa com um shebang, então o handler binfmt lê o caminho do interpretador e quaisquer argumentos separardos por espaço depois do caminho. Ele para quando encontra uma nova linha ou o fim do buffer.
 
-**First of all**, remember that buffer in `linux_binprm` that was filled with the first 256 bytes of the file? That's used for executable format detection, but that same buffer is also what shebangs are read out of in `binfmt_script`.
+<!-- There are two interesting, wonky things going on here. -->
 
-During my research, I read an article that described the buffer as 128 bytes long. At some point after that article was published, the length was doubled to 256 bytes! Curious why, I checked the Git blame — a log of everybody who edited a certain line of code — for the line where `BINPRM_BUF_SIZE` is defined in the Linux source code. Lo and behold...
+Tem duas coisas interessantes acontecendo aqui que não se encaixam:
 
-<img src='/images/binprm-buf-changelog.png' loading='lazy' style='max-width: 550px;' alt='A screenshot of a Git blame window from the Visual Studio Code editor. The git blame shows the line "#define BINPRM_BUF_SIZE 128" being changed to 256. The commit is by Oleg Nesterov, and the main text is "exec: increase BINPRM_BUF_SIZE to 256. Large enterprise clients often run applications out of networked file systems where the IT mandated layout of project volumes can end up leading to paths that are longer than 128 characters.  Bumping this up to the next order of two solves this problem in all but the most egregious case while still fitting into a 512b slab." The commit is signed off by Linus Torvalds, among others.' width='942' height='968' />
+<!-- **First of all**, remember that buffer in `linux_binprm` that was filled with the first 256 bytes of the file? That's used for executable format detection, but that same buffer is also what shebangs are read out of in `binfmt_script`. -->
 
-COMPUTERS ARE SO COOL!
+**Em primeiro lugar**, você se lembra daquele buffer em `linux_binprm` que era preenchido com os primeiros 256 bytes do arquivo? É isso que é usado para a detecção do formato executável, mas o mesmo buffer é o que é usado para ler os shebangs em `binfmt_script`.
 
-Since shebangs are handled by the kernel, and pull from `buf` instead of loading the whole file, they're *always* truncated to the length of `buf`. Apparently, 4 years ago, someone got annoyed by the kernel truncating their >128-character paths, and their solution was to double the truncation point by doubling the buffer size! Today, on your very own Linux machine, if you have a shebang line more than 256 characters long, everything past 256 characters will be *completely lost*.
+<!-- During my research, I read an article that described the buffer as 128 bytes long. At some point after that article was published, the length was doubled to 256 bytes! Curious why, I checked the Git blame — a log of everybody who edited a certain line of code — for the line where `BINPRM_BUF_SIZE` is defined in the Linux source code. Lo and behold... -->
 
-<img src='/images/linux-shebang-truncation.png' loading='lazy' style='max-width: 500px;' alt='A diagram depicting shebang truncation. A large array of bytes from a file named file.bin. The first 256 bytes are highlighted and labeled "Loaded into buf," while the remaining bytes are translucent and labeled "Ignored, past 256 bytes."' width='730' height='548' />
+Durante minha pesquisa, eu li um artigo que descrevia o buffer como tendo 128 bytes de comprimento. Em algum momento deopis que esse artigo foi publicado, o tamanho dobrou para 256 bytes! Por curiosidade, eu chequei o Git blame - um registro de todo mundo que editou uma linha de código - na linha de código onde `BINPRM_BUF_SIZE` é definido no ćodigo fonte do Linux. Eis que...
 
-Imagine having a bug because of this. Imagine trying to figure out the root cause of what's breaking your code. Imagine how it would feel, discovering that the problem is deep within the Linux kernel. Woe to the next IT person at a massive enterprise who discovers that part of a path has mysteriously gone missing.
+<!-- <img src='/images/binprm-buf-changelog.png' loading='lazy' style='max-width: 550px;' alt='A screenshot of a Git blame window from the Visual Studio Code editor. The git blame shows the line "#define BINPRM_BUF_SIZE 128" being changed to 256. The commit is by Oleg Nesterov, and the main text is "exec: increase BINPRM_BUF_SIZE to 256. Large enterprise clients often run applications out of networked file systems where the IT mandated layout of project volumes can end up leading to paths that are longer than 128 characters.  Bumping this up to the next order of two solves this problem in all but the most egregious case while still fitting into a 512b slab." The commit is signed off by Linus Torvalds, among others.' width='942' height='968' />a -->
 
-**The second wonky thing:** remember how it's only *convention* for `argv[0]` to be the program name, how the caller can pass any `argv` they want to an exec syscall and it will pass through unmoderated?
+<img src='/images/binprm-buf-changelog.png' loading='lazy' style='max-width: 550px;' alt='Um screenshot da janela do Git blame do editor Visual Studio Code. O Git blame mostra a linha "#define BINPRM_BUF_SIZE 128" sendo mudada para 256. Quem criou o commit é Oleg Nesterov, e o texto principal é "exec: increase BINPRM_BUF_SIZE to 256. Large enterprise clients often run applications out of networked file systems where the IT mandated layout of project volumes can end up leading to paths that are longer than 128 characters.  Bumping this up to the next order of two solves this problem in all but the most egregious case while still fitting into a 512b slab". O commit é assinado por Linus Torvalds, entre outros' width='942' height='968' />
 
-It just so happens that `binfmt_script` is one of those places that *assumes* `argv[0]` is the program name. It always removes `argv[0]`, and then adds the following to the start of `argv`:
+Em tradução livre:
 
-- Path to the interpreter
-- Arguments to the interpreter
-- Filename of the script
+~~~
+exec: aumente BINPRM_BUF_SIZE para 256.
+
+Clientes de grandes empresas geralmente executam aplicações a partir de sistemas de arquivos na rede onde o layout de volumes de projeto obrigado pela TI pode levar a caminhos que são mais longos que 128 caracteres. Aumentando ele para a próxima ordem de dois resolve esse problema exceto os mais extremos enquanto ainda couber em um slab de 512b.
+~~~
+
+<!-- COMPUTERS ARE SO COOL! -->
+
+COMPUTADORES SÃO TÃO LEGAIS!
+
+<!-- Since shebangs are handled by the kernel, and pull from `buf` instead of loading the whole file, they're *always* truncated to the length of `buf`. Apparently, 4 years ago, someone got annoyed by the kernel truncating their >128-character paths, and their solution was to double the truncation point by doubling the buffer size! Today, on your very own Linux machine, if you have a shebang line more than 256 characters long, everything past 256 characters will be *completely lost*. -->
+
+Como shebangs são tratadas pelo kernel, e são lidas do `buf` em vez de carregar o arquivo inteiro, elas são *sempre* truncadas no tamanho de `buf`. Aparentemente, há 4 anos, alguém se incomodou com o kernel truncando seus caminhos com mais 128 caracteres e a solução foi dobrar o ponto de truncagem, dobrando o tamanho do buffer para isso! Hoje em dia, na sua máquina Linux, se você tem uma linha de shebang com mais de 256 caracteres, tudo depois de 256 vai ser *completamente perdido*!
+
+<!-- <img src='/images/linux-shebang-truncation.png' loading='lazy' style='max-width: 500px;' alt='A diagram depicting shebang truncation. A large array of bytes from a file named file.bin. The first 256 bytes are highlighted and labeled "Loaded into buf," while the remaining bytes are translucent and labeled "Ignored, past 256 bytes."' width='730' height='548' /> -->
+
+<img src='/images/linux-shebang-truncation.png' loading='lazy' style='max-width: 500px;' alt='Um diagrama mostrando a truncagem do shebang. Um grande número de bytes de um arquivo chamado file.bin. Os primeiros 256 bytes estão destacados e rotulados "Carregado no buf", enquanto os bytes restantes estão translúcidos e rotulados "Ignorados, passou de 256 bytes"' width='730' height='548' />
+
+<!-- Imagine having a bug because of this. Imagine trying to figure out the root cause of what's breaking your code. Imagine how it would feel, discovering that the problem is deep within the Linux kernel. Woe to the next IT person at a massive enterprise who discovers that part of a path has mysteriously gone missing. -->
+
+Imagine ter um bug por causa disso. Imagine tentar descobrir a raiz do que quebrou seu código. Imagine como você se sentiria descobrindo que o problema é dentro do kernel Linux. Meus pêsames para a próxima pessoa de TI em uma grande empresa que descobriu que parte do caminho sumiu misteriosamente.
+
+<!-- **The second wonky thing:** remember how it's only *convention* for `argv[0]` to be the program name, how the caller can pass any `argv` they want to an exec syscall and it will pass through unmoderated? -->
+
+**A segunda coisa que não se encaixa:** lembra que `argv[0]` ser o nome do programa é só uma convenção? Como o programa chamador pode passar qualquer `argv` que quiser para executar uma syscall exec e isso passar despercebido?
+
+<!-- It just so happens that `binfmt_script` is one of those places that *assumes* `argv[0]` is the program name. It always removes `argv[0]`, and then adds the following to the start of `argv`: -->
+
+Isso acontece porque o `binfmt_script` é um dos lugares que *supõem* que `argv[0]` é o nome do programa. Ele sempre remove `argv[0]`, e então adiciona o seguinte no começo do `argv`:
+
+<!-- - Path to the interpreter -->
+<!-- - Arguments to the interpreter -->
+<!-- - Filename of the script -->
+
+- Caminho para o interpretador
+- Argumentos para o interpretador
+- Nome de arquivo do script
 
 <blockquote>
-**Example: Argument Modification**
+<!-- **Example: Argument Modification** -->
 
-Let's look at a sample `execve` call:
+**Exemplo: modificação de argumentos:**
+
+<!-- Let's look at a sample `execve` call: -->
+
+Vamos dar uma olhada em um exemplo de uma chamada `execve`:
+
+<!-- <CodeBlock> -->
+<!-- ```c -->
+<!-- // Arguments: filename, argv, envp -->
+<!-- execve("./script", [ "A", "B", "C" ], []); -->
+<!-- ``` -->
+<!-- </CodeBlock> -->
 
 <CodeBlock>
 ```c
-// Arguments: filename, argv, envp
+// Argumentos; nome de arquivo, argv, envp
 execve("./script", [ "A", "B", "C" ], []);
 ```
 </CodeBlock>
 
-This hypothetical `script` file has the following shebang as its first line:
+<!-- This hypothetical `script` file has the following shebang as its first line: -->
+
+Este arquivo `script` hipotético tem o seguinte shebang como sua primeira linha:
 
 <CodeBlock name='script' startLine={1}>
 ```js
@@ -300,7 +375,9 @@ This hypothetical `script` file has the following shebang as its first line:
 ```
 </CodeBlock>
 
-The modified `argv` finally passed to the Node interpreter will be:
+<!-- The modified `argv` finally passed to the Node interpreter will be: -->
+
+O `argv` modificado que é passo no fim para o interpretador Node vai ser:
 
 <CodeBlock>
 ```c
@@ -309,50 +386,99 @@ The modified `argv` finally passed to the Node interpreter will be:
 </CodeBlock>
 </blockquote>
 
-After updating `argv`, the handler finishes preparing the file for execution by setting `linux_binprm.interp` to the interpreter path (in this case, the Node binary). Finally, it returns 0 to indicate success preparing the program for execution.
+<!-- After updating `argv`, the handler finishes preparing the file for execution by setting `linux_binprm.interp` to the interpreter path (in this case, the Node binary). Finally, it returns 0 to indicate success preparing the program for execution. -->
 
-### Format Highlight: Miscellaneous Interpreters
+Depois de atualizar o `argv`, o handler termina a preparação do arquivo para a execução apontando o `linux_binprm.interp` para o caminho do interpretador (neste caso, uma bibliotecad Node). Finalmente, ele retorna 0 para indicar que a preparação do programa para execução foi bem sucedida.
 
-Another interesting handler is `binfmt_misc`. It opens up the ability to add some limited formats through userland configuration, by mounting a special file system at `/proc/sys/fs/binfmt_misc/`. Programs can perform [specially formatted](https://docs.kernel.org/admin-guide/binfmt-misc.html) writes to files in this directory to add their own handlers. Each configuration entry specifies:
+<!-- ### Format Highlight: Miscellaneous Interpreters -->
 
-- How to detect their file format. This can specify either a magic number at a certain offset or a file extension to look for.
-- The path to an interpreter executable. There's no way to specify interpreter arguments, so a wrapper script is needed if those are desired.
-- Some configuration flags, including one specifying how `binfmt_misc` updates `argv`.
+### Formato em destaque: outros interpretadores
 
-This `binfmt_misc` system is often used by Java installations, configured to detect class files by their `0xCAFEBABE` magic bytes and JAR files by their extension. On my particular system, a  handler is configured that detects Python bytecode by its .pyc extension and passes it to the appropriate handler.
+<!-- Another interesting handler is `binfmt_misc`. It opens up the ability to add some limited formats through userland configuration, by mounting a special file system at `/proc/sys/fs/binfmt_misc/`. Programs can perform [specially formatted](https://docs.kernel.org/admin-guide/binfmt-misc.html) writes to files in this directory to add their own handlers. Each configuration entry specifies: -->
 
-This is a pretty cool way to let program installers add support for their own formats without needing to write highly privileged kernel code.
+Outro handler interessante é o `binfmt_misc`. Ele permite que outros formatos limitados sejam adicionados através do espaço de usuário, montando um sistema de arquivos especial em `/proc/sys/fs/binfmt_misc`. Os programas podem escrever [em um formato especial](https://docs.kernel.org/admin-guide/binfmt-misc.html) em arquivos nesse diretório para adicionar seus próprios handlers. Cada entrada da configuração especifica:
 
-## In the End (Not the Linkin Park Song)
+<!-- - How to detect their file format. This can specify either a magic number at a certain offset or a file extension to look for. -->
+<!-- - The path to an interpreter executable. There's no way to specify interpreter arguments, so a wrapper script is needed if those are desired. -->
+<!-- - Some configuration flags, including one specifying how `binfmt_misc` updates `argv`. -->
 
-An exec syscall will always end up in one of two paths:
+- Como detectar seu formato de arquivo. Isso pode ser especificar tanto um número mágico em um certo offset ou uma extensão de arquivo para ser olhada.
+- O caminho do executável do interpretador. Não há como especificar argumentos do interpretador, então um script encapsulador pode ser necessário se eles forem desejados.
+- Algumas flags de configuração, incluindo uma especificando como o `binfmt_misc` atualiza o `argv`.
 
-- It will eventually reach an executable binary format that it understands, perhaps after several layers of script interpreters, and run that code. At this point, the old code has been replaced.
-- ... or it will exhaust all its options and return an error code to the calling program, tail between its legs.
+<!-- This `binfmt_misc` system is often used by Java installations, configured to detect class files by their `0xCAFEBABE` magic bytes and JAR files by their extension. On my particular system, a  handler is configured that detects Python bytecode by its .pyc extension and passes it to the appropriate handler. -->
 
-If you've ever used a Unix-like system, you might've noticed that shell scripts run from a terminal still execute if they don't have a shebang line or `.sh` extension. You can test this out right now if you have a non-Windows terminal handy:
+Esse sistema do `binfmt_misc` é muito usado em instalações de Java, configuradas para detectar arquivos de classes através dos bytes mágicos `0xCAFEBABE` e os arquivos JAR pela sua extensão. Em meu sistema particular, um handler é configurado para detecar bytecode Python pelo sua extensão .pyc e passa ele para o handler apropriado.
+
+<!-- This is a pretty cool way to let program installers add support for their own formats without needing to write highly privileged kernel code. -->
+
+Essa é uma forma bem legal de deixar instaladores de programas darem suporte para seus próprios formatos sem precisar escrever código de kernel com muitos privilégios.
+
+<!-- ## In the End (Not the Linkin Park Song) -->
+
+## Finalmente
+
+<!-- An exec syscall will always end up in one of two paths: -->
+
+Uma syscall exec vai sempre tomar um destes caminhos
+
+<!-- - It will eventually reach an executable binary format that it understands, perhaps after several layers of script interpreters, and run that code. At this point, the old code has been replaced. -->
+<!-- - ... or it will exhaust all its options and return an error code to the calling program, tail between its legs. -->
+
+- Ela vai eventualmente chegar em um formato binário executável que ela entende, talvez depois de várias camadas de interpretadores de scripts, e vai executar esse código. Neste ponto, o código antigo já vai ter sido substituído.
+- ... ou ela vai ficar sem opções e vai devolver um código de erro para o programa que a chamou, pondo o rabo entre as pernas.
+
+<!-- If you've ever used a Unix-like system, you might've noticed that shell scripts run from a terminal still execute if they don't have a shebang line or `.sh` extension. You can test this out right now if you have a non-Windows terminal handy: -->
+
+Se você já sistema Unix-like, então talvez você já notou que shell scripts que são executados em um terminal são executados mesmo se eles não tiverem um shebang ou uma extensão `.sh`. Você pode testar isso agora se você tem um terminal não-Windows à mão:
+
+<!-- <CodeBlock name='Shell session'> -->
+<!-- ``` -->
+<!-- $ echo "echo hello" > ./file -->
+<!-- $ chmod +x ./file -->
+<!-- $ ./file -->
+<!-- hello -->
+<!-- ``` -->
+<!-- </CodeBlock> -->
 
 <CodeBlock name='Shell session'>
 ```
-$ echo "echo hello" > ./file
+$ echo "echo ola" > ./file
 $ chmod +x ./file
 $ ./file
-hello
+ola
 ```
 </CodeBlock>
 
-(`chmod +x` tells the OS that a file is an executable. You won't be able to run it otherwise.)
+<!-- (`chmod +x` tells the OS that a file is an executable. You won't be able to run it otherwise.) -->
 
-So, why does the shell script run as a shell script? The kernel's format handlers should have no clear way of detecting shell scripts without any discernible label!
+(`chmod +x` diz ao OS que um arquivo é um executável. Você não será capaz de executá-lo, caso contrário).
 
-Well, it turns out that this behavior isn't part of the kernel. It's actually a common way for your *shell* to handle a failure case.
+<!-- So, why does the shell script run as a shell script? The kernel's format handlers should have no clear way of detecting shell scripts without any discernible label! -->
 
-When you execute a file using a shell and the exec syscall fails, most shells will *retry executing the file as a shell script* by executing a shell with the filename as the first argument. Bash will typically use itself as this interpreter, while ZSH uses whatever `sh` is, usually [Bourne shell](https://en.wikipedia.org/wiki/Bourne_shell).
+Então, por que um shell script é executado como um shell script? Os handlers do kernel não deveriam ter uma forma clara de detectar shell scripts sem um rótulo claro!
 
-This behavior is so common because it's specified in [*POSIX*](https://en.wikipedia.org/wiki/POSIX), an old standard designed to make code portable between Unix systems. While POSIX isn't strictly followed by most tools or operating systems, many of its conventions are still shared.
+<!-- Well, it turns out that this behavior isn't part of the kernel. It's actually a common way for your *shell* to handle a failure case. -->
 
-> If \[an exec syscall\] fails due to an error equivalent to the `[ENOEXEC]` error, **the shell shall execute a command equivalent to having a shell invoked with the command name as its first operand**, with any remaining arguments passed to the new shell. If the executable file is not a text file, the shell may bypass this command execution. In this case, it shall write an error message and shall return an exit status of 126.
-> 
-> *Source: <cite>[Shell Command Language, POSIX.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/utilities/V3_chap02.html#tag_18_09_01_01)</cite>*
+Bom, acontece que esse comportamento não é parte do kernel. Na verdade é uma forma comum do seu *shell* lidar com um caso de falha.
 
-Computers are so cool!
+<!-- When you execute a file using a shell and the exec syscall fails, most shells will *retry executing the file as a shell script* by executing a shell with the filename as the first argument. Bash will typically use itself as this interpreter, while ZSH uses whatever `sh` is, usually [Bourne shell](https://en.wikipedia.org/wiki/Bourne_sbhell). -->
+
+Quando você executa um arquivo usando um shell e a syscall exec falha, a maior parte dos shells vai *tentar executar o arquivo como um shell script*, executando um shell com o nome do arquivo como primeiro argumento. O Bash vai tipicamente usar ele mesmo como interpretador, enquanto o ZSH vai usar qualquer coisa que for o `sh`, usualmente o [Bourne shell](https://en.wikipedia.org/wiki/Bourne_sbhell).
+
+<!-- This behavior is so common because it's specified in [*POSIX*](https://en.wikipedia.org/wiki/POSIX), an old standard designed to make code portable between Unix systems. While POSIX isn't strictly followed by most tools or operating systems, many of its conventions are still shared. -->
+
+Esse comportamento é tão comum porque é especificado na [*POSIX*](https://en.wikipedia.org/wiki/POSIX), um velho padrão criado para manter códigos portáveis entre sistemas Unix. Mesmo que a POSIX não seja rigorosamente seguida pela maior parte das ferramentas ou sistemas operacionais, muitas de suas convenções ainda são compartilhadas.
+
+<!-- > If \[an exec syscall\] fails due to an error equivalent to the `[ENOEXEC]` error, **the shell shall execute a command equivalent to having a shell invoked with the command name as its first operand**, with any remaining arguments passed to the new shell. If the executable file is not a text file, the shell may bypass this command execution. In this case, it shall write an error message and shall return an exit status of 126. -->
+<!-- >  -->
+<!-- > *Source: <cite>[Shell Command Language, POSIX.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/utilities/V3_chap02.html#tag_18_09_01_01)</cite>* -->
+
+> Se \[uma syscall exec\] falha devido a um erro equivalente ao erro `[ENOEXEC]`, **o shell deve executar um comando equivalente a chamar um shell com o nome do comando como seu primeiro operando**, com quaisquer argumentos restantes passados para o novo shell. Se o arquivo executável não é um arquivo de texto, o shell deverá ignorar a execução do comando. Neste caso, ele deverá escrever uma mensagem de erro e retornar o status 126.
+>
+> *Fonte: <cite>[Shell Command Language, POSIX.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/utilities/V3_chap02.html#tag_18_09_01_01)</cite>* -->
+
+
+<!-- Computers are so cool! -->
+
+Computadores são tão legais!
