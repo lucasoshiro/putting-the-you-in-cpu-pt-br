@@ -1,6 +1,6 @@
 ---
 chapter: 4
-title: Becoming an Elf-Lord
+title: Se tornando líder dos ELFs
 shortname: ELF
 slug: becoming-an-elf-lord
 updatedAt: 2023-07-17T17:16:18.079Z
@@ -8,24 +8,43 @@ updatedAt: 2023-07-17T17:16:18.079Z
 
 import CodeBlock from '../../components/CodeBlock.astro'
 
-We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format).
+<!-- We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format). -->
+
+Nós entendemos bem o `execve` agora. No fim da maior parte dos caminhos, o kernel vai chegar em um programa final contendo código de máquina para que eles sejam iniciados. Tipicamente, um processo de preparação é necessário antes de entrar no código - por exemplo, diferentes parte de um programa precisam ser carregadas para os lugares corretos na memória. Cada programa precisa de quantidades diferentes de memória para diferentes coisas, então nós precisamos de formatos de arquivo padrão que especificam como preparar um programa para execução. Enquanto o Linux suporta vários formatos, a forma mais comum de longe é o *ELF* (executable and linkable format).
+
+<!-- <p> -->
+<!-- 	<img src='/images/gnu-linux-elf-drawing.jpg' loading='eager' style='max-width: 260px; margin: 0 auto;' alt='A marker drawing on paper. A wizard elf is shown meditating, holding the head of a gnu in one hand and a Linux penguin in the other. The elf trails off, saying "Well, actually, Linux is just the kernel, the operating system is..." The drawing is captioned in red marker: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." The drawing is signed "Nicky."' width='529' height='256' /> -->
+<!-- </p> -->
+<!-- <div style='text-align: center;'> -->
+<!-- 	<p style='margin-top: -10px;'> -->
+<!-- 		(Thank you to <a href='https://ncase.me/' target='_blank'>Nicky Case</a> for the adorable drawing.) -->
+<!-- 	</p> -->
+<!-- </div> -->
 
 <p>
-	<img src='/images/gnu-linux-elf-drawing.jpg' loading='eager' style='max-width: 260px; margin: 0 auto;' alt='A marker drawing on paper. A wizard elf is shown meditating, holding the head of a gnu in one hand and a Linux penguin in the other. The elf trails off, saying "Well, actually, Linux is just the kernel, the operating system is..." The drawing is captioned in red marker: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." The drawing is signed "Nicky."' width='529' height='256' />
+	<img src='/images/gnu-linux-elf-drawing.jpg' loading='eager' style='max-width: 260px; margin: 0 auto;' alt='Um desenho de caneta no papel. Um elfo mago é mostrado meditando, segurando a cabeça de um gnu em uma mão e um pinguim do Linux na outra. O elfo fala cada vez mais baixo, dizendo "Well, actually, Linux is just the kernel, the operating system is...". O desenho tem como legenda em caneta vermelha: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." Há uma assinatura no desenho escrito "Nicky".' width='529' height='256' />
 </p>
 <div style='text-align: center;'>
 	<p style='margin-top: -10px;'>
-		(Thank you to <a href='https://ncase.me/' target='_blank'>Nicky Case</a> for the adorable drawing.)
+		(Obrigada <a href='https://ncase.me/' target='_blank'>Nicky Case</a> pelo desenho adorável.)
 	</p>
 </div>
 
-> **Aside: are elves everywhere?**
-> 
-> When you run an app or command-line program on Linux, it's exceedingly likely that it's an ELF binary. However, on macOS the de-facto format is  [Mach-O](https://en.wikipedia.org/wiki/Mach-O) instead. Mach-O does all the same things as ELF but is structured differently. On Windows, .exe files use the [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) format which is, again, a different format with the same concept.
+<!-- > **Aside: are elves everywhere?** -->
+<!-- >  -->
+<!-- > When you run an app or command-line program on Linux, it's exceedingly likely that it's an ELF binary. However, on macOS the de-facto format is  [Mach-O](https://en.wikipedia.org/wiki/Mach-O) instead. Mach-O does all the same things as ELF but is structured differently. On Windows, .exe files use the [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) format which is, again, a different format with the same concept. -->
 
-In the Linux kernel, ELF binaries are handled by the `binfmt_elf` handler, which is more complex than many other handlers and contains thousands of lines of code. It's responsible for parsing out certain details from the ELF file and using them to load the process into memory and execute it.
+> Observação: os ELFs estão em todo lugar?
+>
+> Quando você executa uma aplicação ou um programa de linha de comando no Linux, é extremamente provável que seja um binário ELF. Porém, no macOS o formato de-facto é o [Mach-O](https://en.wikipedia.org/wiki/Mach-O). Mach-O faz as mesmas coisas qeu o ELF mas é estruturado diferente. No Windows, arquivos .exe usam o formato [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) que é, de novo, um formato diferente com o mesmo conceito.
 
-*I ran some command-line kung fu to sort binfmt handlers by line count:*
+<!-- In the Linux kernel, ELF binaries are handled by the `binfmt_elf` handler, which is more complex than many other handlers and contains thousands of lines of code. It's responsible for parsing out certain details from the ELF file and using them to load the process into memory and execute it. -->
+
+No kernel Linux, binários ELF são tratados pelo handler `binfmt_elf`, que é mais complexto que vários outros e contém milhares de linhas de código. Ele é responsável por parsear certos detalhes do arquivo ELF e por usar eles para carregar o processo na memória e executá-lo.
+
+<!-- *I ran some command-line kung fu to sort binfmt handlers by line count:* -->
+
+*Eu rodei alguns kung-fus na linha de comando para ordenar os handlers binfmt pela quantidade de linhas:
 
 <CodeBlock name='Shell session'>
 ```
@@ -39,34 +58,63 @@ $ wc -l binfmt_* | sort -nr | sed 1d
 ```
 </CodeBlock>
 
-## File Structure
+<!-- ## File Structure -->
 
-Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts:
+## Estrutura do arquivo
 
-<img src='/images/elf-file-structure.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A diagram showing an overview of the structure of ELF files, with four sequential sections. Section 1, ELF Header: basic information about the binary, and locations of PHT and SHT. Section 2, Program Header Table (PHT): describes how and where to load the ELF file&apos;s data into memory. Section 3, Section Header Table (SHT): optional "map" of the data to assist in debugging. Section 4, Data: all of the binary&apos;s data. The PHT and SHT point into this section.' width='1033' height='786' />
+<!-- Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts: -->
 
-### ELF Header
+Antes de olhar mais profundamente em como o `binfmt_elf` executa os arquivos ELF, vamos dar uma olhada no próprio formato de arquivo. Arquivos ELF tipicamente são compostos por quatro partes:
 
-Every ELF file has an [ELF header](https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html). It has the very important job of conveying basic information about the binary such as:
+<!-- <img src='/images/elf-file-structure.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A diagram showing an overview of the structure of ELF files, with four sequential sections. Section 1, ELF Header: basic information about the binary, and locations of PHT and SHT. Section 2, Program Header Table (PHT): describes how and where to load the ELF file&apos;s data into memory. Section 3, Section Header Table (SHT): optional "map" of the data to assist in debugging. Section 4, Data: all of the binary&apos;s data. The PHT and SHT point into this section.' width='1033' height='786' /> -->
 
-- What processor it's designed to run on. ELF files can contain machine code for different processor types, like ARM and x86.
-- Whether the binary is meant to be run on its own as an executable, or whether it's meant to be loaded by other programs as a "dynamically linked library." We'll go into details about what dynamic linking is soon.
-- The entry point of the executable. Later sections specify exactly where to load data contained in the ELF file into memory. The entry point is a memory address pointing to where the first machine code instruction is in memory after the entire process has been loaded.
+<img src='/images/elf-file-structure.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='Um diagrama mostrando uma visão geral da estrutura de arquivos ELF, com quatro seções sequenciais. A seção 1, ELF Header: informações básicas sobre o binário e as localizações da PHT e SHT. Seção 2, Program Header Tabler (PHT): descreve como e quanto carregar os dados do arquivo ELF na memória. Seção 3, Section Header Table: "mapa" opcional de dados usados para ajudar na depuração. Seção 4, Data: todos os dados do binário. PHT e SHT apontam para estaseção' width='1033' height='786' />
 
-The ELF header is always at the start of the file. It specifies the locations of the program header table and section header, which can be anywhere within the file. Those tables, in turn, point to data stored elsewhere in the file.
+<!-- ### ELF Header -->
 
-### Program Header Table
+### Cabeçalho do ELF
 
-The [program header table](https://refspecs.linuxbase.org/elf/gabi4+/ch5.pheader.html) is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere.
+<!-- Every ELF file has an [ELF header](https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html). It has the very important job of conveying basic information about the binary such as: -->
 
-<img src='/images/elf-program-header-types.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A table showing four different common program header types. Type 1, PT_LOAD: data to be loaded into memory. Type 2, PT_NOTE: freeform text like copyright notices, version info, etc.. Type 3, PT_DYNAMIC: Info about dynamic linking. Type 4, PT_INTERP: Path to the location of an "ELF interpreter."' width='904' height='338' />
+Todo arquivo ELF tem um [cabeçalho ELF](https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html). Ele tem o importante trabalho de carregar informações básicas sobre o binário como:
 
-Each entry specifies information about where its data is in the file and, sometimes, how to load the data into memory:
+<!-- - What processor it's designed to run on. ELF files can contain machine code for different processor types, like ARM and x86. -->
+<!-- - Whether the binary is meant to be run on its own as an executable, or whether it's meant to be loaded by other programs as a "dynamically linked library." We'll go into details about what dynamic linking is soon. -->
+<!-- - The entry point of the executable. Later sections specify exactly where to load data contained in the ELF file into memory. The entry point is a memory address pointing to where the first machine code instruction is in memory after the entire process has been loaded. -->
 
-- It points to the position of its data within the ELF file.
-- It can specify what virtual memory address the data should be loaded into memory at. This is typically left blank if the segment isn't meant to be loaded into memory.
-- Two fields specify the length of the data: one for the length of the data in the file, and one for the length of the memory region to be created. If the memory region length is longer than the length in the file, the extra memory will be filled with zeroes. This is beneficial for programs that might want a static segment of memory to use at runtime; these empty segments of memory are typically called [BSS](https://en.wikipedia.org/wiki/.bss) segments.
-- Finally, a flags field specifies what operations should be permitted if it's loaded into memory: `PF_R` makes it readable, `PF_W` makes it writable, and `PF_X` means it's code that should be allowed to execute on the CPU.
+- Para qual processador ele é projeto para ser executado. Arquivos ELF podem conter código de máquina para diferentes tipos de processador, como ARM e x86.
+- Se o binário é feito para ser executado sozinho como executável ou se é feito para ser carregado por outros programas como uma biblioteca ligada dinamicamente (em inglês, "dynamically linked library"). Vamos entrar em detalhes sobre isso em breve.
+- O ponto de entrada do executável. Seções mais pra frente especificam exatamente onde carregar os dados contidos no ELF para a memória. O ponto de entrada é um endereço de memória apontando onde a primeira instrução de código de máquina fica na memória depois que todo o processo foi carregado.
+
+<!-- The ELF header is always at the start of the file. It specifies the locations of the program header table and section header, which can be anywhere within the file. Those tables, in turn, point to data stored elsewhere in the file. -->
+
+O cabeçalho ELF sempre fica no começo do arquivo. Ele especifica as localizações da tabela de cabeçalho de programa e da tabela de cabeçalho de seção, que pode estar em qualquer lugar no arquivo. Essas tabelas, por sua vez, apontam para dados apontados em outros lugares no arquivo.
+
+<!-- ### Program Header Table -->
+
+### Tabela de cabeçalho de programa (*program header table*)
+
+<!-- The [program header table](https://refspecs.linuxbase.org/elf/gabi4+/ch5.pheader.html) is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere. -->
+
+A [tabela de cabeçalho de programa](https://refspecs.linuxbase.org/elf/gabi4+/ch5.pheader.html) é uma série de entradas contendo detalhes especificos de como carregar e executar o binário em tempo de execução. Cada entrada tem um campo de tipo que diz qual detalhe está especificando - por exemplo, `PT_LOAD` significa que contém dados que devem ser carregados na memória, enquanto `PT_NODE` significa que o segmento contém textos informativos que não deveriam ser carregados em nenhum lugar.
+
+<!-- <img src='/images/elf-program-header-types.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A table showing four different common program header types. Type 1, PT_LOAD: data to be loaded into memory. Type 2, PT_NOTE: freeform text like copyright notices, version info, etc.. Type 3, PT_DYNAMIC: Info about dynamic linking. Type 4, PT_INTERP: Path to the location of an "ELF interpreter."' width='904' height='338' /> -->
+
+<img src='/images/elf-program-header-types.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='Uma tabela mostrando quatro diferentes tipos do cabeçalho de programa. Tipo 1, PT_LOAD: dados que devem ser carregados na memória. Tipo 2, PT_NODE: texto em formato livre como notas de copyright, informação da versão, etc... Tipo 3, PT_DYNAMIC: informação sobre ligações dinâmicas. Tipo 4, PT_INTERP: Caminho para a localização de um "interpretador ELF".' width='904' height='338' />
+
+<!-- Each entry specifies information about where its data is in the file and, sometimes, how to load the data into memory: -->
+
+Cada entrada especifica informações sobre onde seus dados estão no arquivo e, às vezes, como carregar esses dados na memória:
+
+<!-- - It points to the position of its data within the ELF file. -->
+<!-- - It can specify what virtual memory address the data should be loaded into memory at. This is typically left blank if the segment isn't meant to be loaded into memory. -->
+<!-- - Two fields specify the length of the data: one for the length of the data in the file, and one for the length of the memory region to be created. If the memory region length is longer than the length in the file, the extra memory will be filled with zeroes. This is beneficial for programs that might want a static segment of memory to use at runtime; these empty segments of memory are typically called [BSS](https://en.wikipedia.org/wiki/.bss) segments. -->
+<!-- - Finally, a flags field specifies what operations should be permitted if it's loaded into memory: `PF_R` makes it readable, `PF_W` makes it writable, and `PF_X` means it's code that should be allowed to execute on the CPU. -->
+
+- Ela aponta para a posição de seus dados dentro do arquivo ELF.
+- Ela pode especificar qual endereço da memória virtual em que os dados devem ser carregados. Isso tipicamente é deixado vazio se o segmento não é feito para ser carregado na memória.
+- Dois campos especificam o tamanho dos dados: um para o comprimento dos dados no arquivo e outro para o tamanho da região a ser criada na memória. Se o comprimento da região da memória é maior que o tamanho do arquivo, a memória extra será preenchida com zeros. Isso é benéfico para programas que precisam de um segmento estático de memória para usar em tempo de execução; esses segmentos vazios de memória são tipicamente chamados de segmentos [BSS](https://en.wikipedia.org/wiki/.bss).
+- Finalmente, um campo flags especifica quais operações devem ser permitidas se eles forem carregadas na memória: `PF_R` permite que eles sejam lidos, `PF_W` permite que eles sejam escritos, e `PF_X` significa que é um código deve ser permitido que seja executado na CPU.
 
 ### Section Header Table
 
