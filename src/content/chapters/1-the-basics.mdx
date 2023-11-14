@@ -28,7 +28,7 @@ A primeira CPU feita em massa foi o [Intel 4004](http://www.intel4004.com/), pro
 
 <!-- The "instructions" that CPUs execute are just binary data: a byte or two to represent what instruction is being run (the opcode), followed by whatever data is needed to run the instruction. What we call *machine code* is nothing but a series of these binary instructions in a row. [Assembly](https://en.wikipedia.org/wiki/Assembly_language) is a helpful syntax for reading and writing machine code that's easier for humans to read and write than raw bits; it is always compiled to the binary that your CPU knows how to read. -->
 
-As instru;'oes que as CPUs executam são apenas dados binários: um byte ou dois representam qual instrução está sendo executada (o opcode), seguida de quaisquer dados que sejam necessários para executar essa instrução. O que chamamos de *código de máquina* não é nada além de uma série dessas instruções binárias em sequência. A linguagem [Assembly](https://en.wikipedia.org/wiki/Assembly_language) é uma sintaxe que ajuda a ler e escrever código que sejam mais fáceis de serem lidos e escritos por humanos que apenas bits; ela é sempre compilada para o binário que a sua CPU sabe como ler.
+As instruções que as CPUs executam são apenas dados binários: um byte ou dois representam qual instrução está sendo executada (o opcode), seguida de quaisquer dados que sejam necessários para executar essa instrução. O que chamamos de *código de máquina* não é nada além de uma série dessas instruções binárias em sequência. A linguagem [Assembly](https://en.wikipedia.org/wiki/Assembly_language) é uma sintaxe que ajuda a ler e escrever código que sejam mais fáceis de serem lidos e escritos por humanos que apenas bits; ela é sempre compilada para o binário que a sua CPU sabe como ler.
 
 <!-- <img src='/images/assembly-to-machine-code-translation.png' loading='eager' style='max-width: 400px;' alt='A diagram demonstrating how machine code translates to assembly and back. A bidirectional arrow connects three examples: Machine Code (Binary) followed by 3 bytes of binary numbers, Machine Code (Hex) followed by those 3 bytes translated to hex (0x83, 0xC3, 0x0A), and Assembly followed by "add ebx, 10". The Assembly and Machine Code are color-coded so it is clear that each byte of the machine code translate to one word in the assembly.' width='935' height='505' /> -->
 
@@ -60,7 +60,7 @@ A CPU armazena um *apontador de instrução* (em inglês, *instruction pointer*)
 
 <!-- After executing an instruction, the pointer moves forward to immediately after the instruction in RAM so that it now points to the next instruction. That's why code runs! The instruction pointer just keeps chugging forward, executing machine code in the order in which it has been stored in memory. Some instructions can tell the instruction pointer to jump somewhere else instead, or jump different places depending on a certain condition; this makes reusable code and conditional logic possible. -->
 
-Após executar uma instrução, o apontador se move para a frente imediatamente após a instrução na RAM de forma que agora aponta para a próxima instrução. É por isso que o código executa! O ponteiro de instrução apenas se move para a frente, executando o código de máquina na ordem que foi armazenado na memória. Algumas instruções podem dizer ao ponteiro de instrução para pular para outro lugar, ou pular para diferentes lugares dependendo de uma certa condição; isso torna o reúso de código e a lógica condicional possivel.
+Após executar uma instrução, o apontador se move para a frente imediatamente após a instrução na RAM de forma que agora aponta para a próxima instrução. É por isso que o código executa! O ponteiro de instrução apenas se move para a frente, executando o código de máquina na ordem que foi armazenado na memória. Algumas instruções podem dizer ao ponteiro de instrução para pular para outro lugar, ou pular para diferentes lugares dependendo de uma certa condição; isso torna o reúso de código e a lógica condicional possível.
 
 <!-- This instruction pointer is stored in a [*register*](https://en.wikipedia.org/wiki/Processor_register). Registers are small storage buckets that are extremely fast for the CPU to read and write to. Each CPU architecture has a fixed set of registers, used for everything from storing temporary values during computations to configuring the processor. -->
 
@@ -90,7 +90,9 @@ Vamos voltar para a questão original: o que acontece quando você executa um pr
 
 <img src='/images/instruction-pointer.png' loading='lazy' style='max-width: 400px;' alt='Um diagrama mostrando uma série de bytes de código de máquina na RAM. Um byte destacado é apontado por uma seta rotulada "Apontador de Instrução", e há setas representando como um apontador de instrução se move para a frente na RAM.' width='935' height='372' />
 
-It turns out CPUs have a super basic worldview; they only see the current instruction pointer and a bit of internal state. Processes are entirely operating system abstractions, not something CPUs natively understand or keep track of.
+<!-- It turns out CPUs have a super basic worldview; they only see the current instruction pointer and a bit of internal state. Processes are entirely operating system abstractions, not something CPUs natively understand or keep track of. -->
+
+Acontece que as CPUs tem uma visão de mundo super básica; elas apenas veem o ponteiro de instrução atual e um pouco dos estados internos. Processos são uma abstração completamente do sistema operacional, e não alguma coisa que as CPUs nativamente entendem e conseguem acompanhar.
 
 <!-- *\*waves hands\* processes are abstractions made up by ~~os devs~~ big byte to sell more computers* -->
 
@@ -98,7 +100,7 @@ It turns out CPUs have a super basic worldview; they only see the current instru
 
 <!-- For me, this raises more questions than it answers: -->
 
-Para mim, isso levanta mais questçoes do que responde:
+Para mim, isso levanta mais questões do que responde:
 
 <!-- 1. If the CPU doesn’t know about multiprocessing and just executes instructions sequentially, why doesn’t it get stuck inside whatever program it’s running? How can multiple programs run at once? -->
 
@@ -134,7 +136,7 @@ A questão sobre memória merece sua própria seção e está coberta no [capít
 > 
 > O kernel, porém, é o núcleo do sistema operacional. Quando você liga seu computador, o apontador de instrução começa em um programa em algum lugar. Esse programa é o kernel. O kernel tem quase total acesso à memória de seu computador, periféricos e outros recursos, e é responsável por executar software instalado em seu computador (conhecido como programas de espaço de usuário, ou *userland* em inglês). Vamos falar como o kernel tem esse acesso - e como programas do espaço de usuário não têm - conforme avançamos neste artigo.
 >
-> Linux é apenas uma kernel, e precisa de vários programas de espaço de usuário como shells e servidores gráficos para ser usuárvel. O kernel do macOS é chamado [XNU](https://en.wikipedia.org/wiki/XNU) e é Unix-like, e o kernel do Windows moderno é chamado [NT Kernel](https://en.wikipedia.org/wiki/Architecture_of_Windows_NT)
+> Linux é apenas uma kernel, e precisa de vários programas de espaço de usuário como shells e servidores gráficos para ser usável. O kernel do macOS é chamado [XNU](https://en.wikipedia.org/wiki/XNU) e é Unix-like, e o kernel do Windows moderno é chamado [NT Kernel](https://en.wikipedia.org/wiki/Architecture_of_Windows_NT)
 
 <!-- ## Two Rings to Rule Them All -->
 
@@ -142,7 +144,7 @@ A questão sobre memória merece sua própria seção e está coberta no [capít
 
 <!-- The *mode* (sometimes called privilege level or ring) a processor is in controls what it's allowed to do. Modern architectures have at least two options: kernel/supervisor mode and user mode. While an architecture might support more than two modes, only kernel mode and user mode are commonly used these days. -->
 
-O *modo* (as vezes chamado nível de privilégio ou anel) que processador está controla o que é permitido fazer. Arquiteturas modernas tem ao menos duas opções: modo de kernel/superviosr e modo de usuário. Enquanto uma arquitetura pode suportar mais que dois modos, apenas o modo de kernel e o de usuário são usados atualmente.
+O *modo* (as vezes chamado nível de privilégio ou anel) que processador está controla o que é permitido fazer. Arquiteturas modernas tem ao menos duas opções: modo de kernel/supervisor e modo de usuário. Enquanto uma arquitetura pode suportar mais que dois modos, apenas o modo de kernel e o de usuário são usados atualmente.
 
 <!-- In kernel mode, anything goes: the CPU is allowed to execute any supported instruction and access any memory. In user mode, only a subset of instructions is allowed, I/O and memory access is limited, and many CPU settings are locked. Generally, the kernel and drivers run in kernel mode while applications run in user mode. -->
 
@@ -163,7 +165,7 @@ Um exemplo de como os modos do processador se manifestam em uma arquitetura real
 
 <!-- ## What Even is a Syscall? -->
 
-## O que é mesmo uma sycall?
+## O que é mesmo uma syscall?
 
 <!-- Programs run in user mode because they can't be trusted with full access to the computer. User mode does its job, preventing access to most of the computer — but programs need to be able to access I/O, allocate memory, and interact with the operating system *somehow*! To do so, software running in user mode has to ask the operating system kernel for help. The OS can then implement its own security protections to prevent programs from doing anything malicious. -->
 
@@ -191,11 +193,11 @@ Transferências do espaço de usuário para o espaço de kernel são feitas usan
 
 <!-- When this kernel code finishes, it uses an instruction like [IRET](https://www.felixcloutier.com/x86/iret:iretd:iretq) to tell the CPU to switch back to user mode and return the instruction pointer to where it was when the interrupt was triggered. -->
 
-Quando o código do kernel termina, ele usa uma instrução como [IRET](https://www.felixcloutier.com/x86/iret:iretd:iretq) para dizer à CPU para voltar para o modo de usuário e voltar o apontador de instrução para onde ele estava quando a interrução foi chamada.
+Quando o código do kernel termina, ele usa uma instrução como [IRET](https://www.felixcloutier.com/x86/iret:iretd:iretq) para dizer à CPU para voltar para o modo de usuário e voltar o apontador de instrução para onde ele estava quando a interrupção foi chamada.
 
 <!-- (If you were curious, the interrupt ID used for system calls on Linux is `0x80`. You can read a list of Linux system calls on [Michael Kerrisk's online manpage directory](https://man7.org/linux/man-pages/man2/syscalls.2.html).) -->
 
-(Se você tem curiosidade, o identificador de interruções para chamadas de sistema no Linux é `0x80`. Você pode ver uma lista de chamadas de sistema do Linux no [diretório online de manpages de Michael Kerrisk](https://man7.org/linux/man-pages/man2/syscalls.2.html).)
+(Se você tem curiosidade, o identificador de interrupções para chamadas de sistema no Linux é `0x80`. Você pode ver uma lista de chamadas de sistema do Linux no [diretório online de manpages de Michael Kerrisk](https://man7.org/linux/man-pages/man2/syscalls.2.html).)
 
 <!-- ### Wrapper APIs: Abstracting Away Interrupts -->
 
@@ -226,7 +228,7 @@ A diferença na forma como chamadas de sistemas são feitas significa que é pra
 
 <!-- So, operating systems provide an abstraction layer on top of these interrupts. Reusable higher-level library functions that wrap the necessary assembly instructions are provided by [libc](https://www.gnu.org/software/libc/) on Unix-like systems and part of a library called [ntdll.dll](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/libraries-and-headers) on Windows. Calls to these library functions themselves don't cause switches to kernel mode, they're just standard function calls. Inside the libraries, assembly code does actually transfer control to the kernel, and is a lot more platform-dependent than the wrapping library subroutine. -->
 
-Então, sistemas operacionais provêem uma camada de abstração no topo dessas interrupções. Funções de biblioteca de mais alto nível reusáveis que encapsulam as instruções assembly necessárias são fornecidas pela [libc](https://www.gnu.org/software/libc/) em sistemas Unix-like e parte da biblioteca chamada [ntdll.dll](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/libraries-and-headers) no Windows. Chamadas para essas funções por si só não causam trocas no modo do kernel, elas são só chamadas de funções normais. Dentro dessas bibliotecas há códigos assembly que de fato transferem o controle para o kernel, e que são muito mais dependentes da plataforma que a subrotina da biblioteca que os encapsula.
+Então, sistemas operacionais proveem uma camada de abstração no topo dessas interrupções. Funções de biblioteca de mais alto nível reusáveis que encapsulam as instruções assembly necessárias são fornecidas pela [libc](https://www.gnu.org/software/libc/) em sistemas Unix-like e parte da biblioteca chamada [ntdll.dll](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/libraries-and-headers) no Windows. Chamadas para essas funções por si só não causam trocas no modo do kernel, elas são só chamadas de funções normais. Dentro dessas bibliotecas há códigos assembly que de fato transferem o controle para o kernel, e que são muito mais dependentes da plataforma que a sub-rotina da biblioteca que os encapsula.
 
 <!-- When you call `exit(1)` from C running on a Unix-like system, that function is internally running machine code to trigger an interrupt, after placing the system call's opcode and arguments in the right registers/stack/whatever. Computers are so cool! -->
 
@@ -250,7 +252,7 @@ A Intel e a AMD não se coordenam muito bem no x86-64; na verdade há *dois* con
 
 <!-- Representative of the style, [RISC](https://en.wikipedia.org/wiki/Reduced_instruction_set_computer) architectures tend not to have such special instructions. AArch64, the RISC architecture Apple Silicon is based on, uses only [one interrupt instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-) for syscalls and software interrupts alike. I think Mac users are doing fine&nbsp;:) -->
 
-Arquiteturas [RISC](https://en.wikipedia.org/wiki/Reduced_instruction_set_computer) tendem a não ter instruçoes especiais. A AArch64, a arquitetura RISC em que o Apple Silicon é baseado, usa apenas [uma instrução de interrupção](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-) para syscalls e interrupções de software. Eu acho que usuários de Mac passam bem&nbsp;:)
+Arquiteturas [RISC](https://en.wikipedia.org/wiki/Reduced_instruction_set_computer) tendem a não ter instruções especiais. A AArch64, a arquitetura RISC em que o Apple Silicon é baseado, usa apenas [uma instrução de interrupção](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-) para syscalls e interrupções de software. Eu acho que usuários de Mac passam bem&nbsp;:)
 
 ---
 
@@ -264,7 +266,7 @@ Ufa, foi coisa pra caramba! Vamos dar uma recapitulada:
 
 - Processadores executam instruções em um ciclo infinito de busca e execução e não têm nenhum conceito de sistemas operacionais ou programas. O modo do processador, normalmente armazenado em um registrador, determina quais instruções devem ser executadas. O código do sistema operacional é executado em modo kernel e muda para o modo de usuário para executar programas.
 - Para executar um binário, o sistema operacional muda para o modo de usuário e faz o processador apontar para o endereço do código na RAM. Como eles só têm o privilégio do modo de usuário, programas que precisam interagir com o mundo precisam pedir ajuda para o sistema operacional. Chamadas de sistema são uma forma padronizada de programas mudarem do modo de usuário para o modo de kernel e para dentro do código do sistema operacional.
-- Programas tipicamente usam essas sycalls chamando funções de bibliotecas compartilhadas. Elas encapsulam o código de máquina para interrupções de software ou syscalls específicas de cada arquitetura que transferem o controle para o kernel do sistema operacional e mudam os anéis. O kernel faz seu trabalho, troca para o modo de usuário e volta para o código do programa.
+- Programas tipicamente usam essas syscalls chamando funções de bibliotecas compartilhadas. Elas encapsulam o código de máquina para interrupções de software ou syscalls específicas de cada arquitetura que transferem o controle para o kernel do sistema operacional e mudam os anéis. O kernel faz seu trabalho, troca para o modo de usuário e volta para o código do programa.
 
 
 <!-- Let’s figure out how to answer my first question from earlier: -->
